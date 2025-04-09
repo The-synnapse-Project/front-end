@@ -1,0 +1,32 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 200 50"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+>
+  <!-- Circle representing a "node" in a synapse -->
+  <circle cx="25" cy="25" r="10" fill="#4CAF50" />
+
+  <!-- Second circle representing another "node" -->
+  <circle cx="75" cy="25" r="10" fill="#4CAF50" />
+
+  <!-- Connecting black line behind
+  <line x1="35" y1="25" x2="65" y2="25" stroke="#000" stroke-width="5" /> -->
+
+  <!-- Connecting green line -->
+  <line x1="32" y1="25" x2="67" y2="25" stroke="#4CAF50" stroke-width="2"/>
+
+
+  <text
+    x="90"
+    y="30"
+    font-family="'Geist', sans-serif"
+    font-size="20"
+    font-weight="700"
+    fill="#000"
+    stroke-width="0"
+  >
+    Synnapse
+  </text>
+</svg>

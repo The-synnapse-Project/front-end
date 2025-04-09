@@ -1,7 +1,7 @@
 {
 	"$schema": "https://unpkg.com/jsrepo@1.45.3/schemas/registry-config.json",
 	"dirs": [
-		"./src/components"
+		"./src/Components"
 	],
 	"doNotListBlocks": [],
 	"doNotListCategories": [],
