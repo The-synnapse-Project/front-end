@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NavBar from "@/Components/Layout/NavBar";
+import Providers from "./providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,15 +25,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <link rel="shortcut icon" href="favicon.svg" type="image/svg+xml" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col overflow-x-hidden bg-light-primary text-light-txt-primary dark:bg-dark-primary dark:text-dark-txt-primary transition-colors duration-200`}
       >
-        <NavBar />
-        {children}
+        <Providers>
+          <NavBar />
+          <main className="flex-grow w-full max-w-full">{children}</main>
+        </Providers>
       </body>
     </html>
   );

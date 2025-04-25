@@ -16,6 +16,7 @@ interface BalatroProps {
   spinEase?: number;
   isRotate?: boolean;
   mouseInteraction?: boolean;
+  className?: string;
 }
 
 function hexToVec4(hex: string): [number, number, number, number] {
@@ -135,6 +136,7 @@ export default function Balatro({
   spinEase = 1.0,
   isRotate = false,
   mouseInteraction = true,
+  className = "",
 }: BalatroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -145,7 +147,6 @@ export default function Balatro({
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 1);
 
-    // biome-ignore lint/style/useConst: Allow here
     let program: Program;
 
     function resize() {
@@ -233,5 +234,5 @@ export default function Balatro({
     mouseInteraction,
   ]);
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  return <div ref={containerRef} className={`w-full h-full ${className}`} />;
 }
