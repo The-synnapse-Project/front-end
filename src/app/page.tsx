@@ -1,33 +1,48 @@
 "use client";
 import Balatro from "@/Components/Balatro/Balatro";
 import { useTheme } from "@/Components/ThemeContext";
-import SplitText from "@/TextAnimations/SplitText/SplitText";
 
 export default function Home() {
   const { darkMode } = useTheme();
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] overflow-hidden relative">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start z-20  text-dark-txt-primary">
-        <div className="absolute top-0 left-0 w-full h-screen z-[-100] pointer-events-none">
+    <div className="min-h-full mt-10 grid grid-rows-[auto_1fr_auto] items-center justify-items-center w-full p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] overflow-hidden">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center z-20 text-light-txt-primary dark:text-dark-txt-primary w-full">
+        <div className="fixed top-0 left-0 w-screen h-screen z-[-1000] pointer-events-none">
           <Balatro
-            color1={darkMode ? "#4c1714" : "#DE443B"}
-            color2={darkMode ? "#002d4c" : "#006BB4"}
-            color3={darkMode ? "#070c0c" : "#162325"}
+            color1={darkMode ? "#3b82f6" : "#60a5fa"}
+            color2={darkMode ? "#1e293b" : "#3b82f6"}
+            color3={darkMode ? "#0f172a" : "#f8fafc"}
             isRotate={false}
-            mouseInteraction={false}
-            pixelFilter={700}
+            mouseInteraction={true}
+            pixelFilter={800}
             className="transition-all duration-700"
           />
         </div>
-        <h1 className="text-[40px] sm:text-[80px] font-bold text-center ">
-          <SplitText text="Synapse" className="text-gradient " delay={100} />
+        <h1 className="text-[40px] sm:text-[80px] font-bold text-center">
+          <span className="bg-gradient-to-r from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover bg-clip-text text-transparent">
+            Synnapse
+          </span>
         </h1>
-        <SplitText
-          text="Bienvenido a la plataforma para interactuar con el aula inteligente"
-          className="text-[20px] sm:text-[40px] text-center"
-          delay={30}
-        />
+        <div className="max-w-3xl mx-auto">
+          <span className="text-[20px] sm:text-[32px] text-center text-light-txt-secondary dark:text-dark-txt-secondary">
+            Bienvenido a la plataforma del aula inteligente
+          </span>
+        </div>
+        <div className="mt-8 flex gap-4 flex-wrap justify-center">
+          <a
+            href="/login"
+            className="px-6 py-3 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-md shadow-sm hover:shadow-md transition-all duration-300"
+          >
+            Iniciar Sesión
+          </a>
+          <a
+            href="/profile"
+            className="px-6 py-3 bg-transparent border border-light-accent text-light-accent hover:bg-light-accent/10 dark:border-dark-accent dark:text-dark-accent dark:hover:bg-dark-accent/10 rounded-md transition-all duration-300"
+          >
+            Mi Perfil
+          </a>
+        </div>
       </main>
     </div>
   );

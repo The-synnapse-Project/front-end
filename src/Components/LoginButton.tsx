@@ -1,18 +1,108 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function LoginButton() {
+interface LoginButtonProps {
+  isMobile?: boolean;
+}
+
+export default function LoginButton({ isMobile = false }: LoginButtonProps) {
   const { data: session } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const router = useRouter();
+
   const toggleDropdown = () => {
+    if (isMobile) return; // Don't toggle dropdown in mobile mode
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  const handleSignIn = () => {
+    // Navigate to login page instead of directly triggering sign in
+    router.push("/login");
+  };
+
   if (session) {
+    // Display information about the logged-in user
+    const displayName = session.user?.name || session.user?.email || "User";
+    // If we have a surname from the API, use it for display
+    const fullName = session.user?.surname
+      ? `${session.user.name} ${session.user.surname}`
+      : displayName;
+
+    // For mobile menu, render just the profile links without a dropdown
+    if (isMobile) {
+      return (
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center px-3 pb-2">
+            {session.user?.image ? (
+              <img
+                src={session.user.image}
+                alt="Profile"
+                className="h-8 w-8 rounded-full border-2 border-light-accent/20 dark:border-dark-accent/30 mr-3"
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover flex items-center justify-center text-white font-medium shadow-sm mr-3">
+                {session.user?.name?.charAt(0) ||
+                  session.user?.email?.charAt(0) ||
+                  "U"}
+              </div>
+            )}
+            <div>
+              <p className="font-medium text-light-txt-primary dark:text-dark-txt-primary">
+                {fullName}
+              </p>
+              <p className="text-xs text-light-txt-secondary dark:text-dark-txt-secondary truncate">
+                {session.user?.email}
+              </p>
+            </div>
+          </div>
+
+          <a
+            href="/profile"
+            className="flex items-center px-3 py-2 text-light-txt-secondary dark:text-dark-txt-secondary hover:bg-light-secondary/10 hover:text-light-accent dark:hover:bg-dark-secondary/20 dark:hover:text-dark-accent rounded-md transition-colors duration-200"
+            onClick={() => router.push("/profile")}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-3"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                clipRule="evenodd"
+              />
+            </svg>
+            My Profile
+          </a>
+
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="flex items-center w-full text-left px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 rounded-md transition-colors duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-3"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-4-4H3zm6.293 11.293a1 1 0 001.414 0L13 11.414l2.293 2.293a1 1 0 001.414-1.414l-2.293-2.293 2.293-2.293a1 1 0 00-1.414-1.414L13 8.586l-2.293-2.293a1 1 0 00-1.414 1.414L11.586 10l-2.293 2.293a1 1 0 000 1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Sign out
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div className="relative">
         <div
-          className="flex items-center space-x-2 cursor-pointer px-3 py-2 text-light-txt-primary hover:text-light-txt-primary hover:bg-light-secondary/10 dark:text-dark-txt-primary dark:hover:bg-dark-secondary/20 dark:hover:text-dark-txt-primary rounded-md transition-colors duration-200"
+          className="flex items-center space-x-2 cursor-pointer px-3 py-2 text-light-txt-primary hover:text-light-accent hover:bg-light-secondary/10 dark:text-dark-txt-primary dark:hover:text-dark-accent dark:hover:bg-dark-secondary/20 rounded-md transition-all duration-300"
           onClick={toggleDropdown}
         >
           {session.user?.image ? (
@@ -20,7 +110,7 @@ export default function LoginButton() {
               <img
                 src={session.user.image}
                 alt="Profile"
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 rounded-full border-2 border-light-accent/20 dark:border-dark-accent/30"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.style.display = "none";
@@ -29,15 +119,13 @@ export default function LoginButton() {
               />
             </>
           ) : (
-            <div className="h-8 w-8 rounded-full bg-light-primary dark:bg-dark-primary flex items-center justify-center text-light-txt-primary">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover flex items-center justify-center text-white font-medium shadow-sm">
               {session.user?.name?.charAt(0) ||
                 session.user?.email?.charAt(0) ||
                 "U"}
             </div>
           )}
-          <span className="hidden md:inline-block">
-            {session.user?.name || session.user?.email || "User"}
-          </span>
+          <span className="hidden md:inline-block">{fullName}</span>
           <svg
             className="h-4 w-4"
             fill="none"
@@ -55,18 +143,52 @@ export default function LoginButton() {
         </div>
 
         {isDropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-light-primary dark:bg-dark-primary ring-1 ring-black ring-opacity-5 dark:ring-dark-secondary/20 z-40 transition-colors duration-200">
-            <div className="py-1">
-              <div className="px-4 py-2 text-sm text-light-txt-primary dark:text-dark-txt-primary border-b border-light-secondary/20 dark:border-dark-secondary/20 transition-colors duration-200">
-                Signed in as{" "}
-                <span className="font-medium">{session.user?.email}</span>
+          <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-dark-primary border border-light-secondary/20 dark:border-dark-secondary/20 z-40 transition-all duration-200 transform origin-top-right">
+            <div className="overflow-hidden rounded-lg">
+              <div className="px-4 py-3 text-sm text-light-txt-primary dark:text-dark-txt-primary border-b border-light-secondary/20 dark:border-dark-secondary/20">
+                <p className="font-medium">{fullName}</p>
+                <p className="text-xs text-light-txt-secondary dark:text-dark-txt-secondary truncate mt-1">
+                  {session.user?.email}
+                </p>
               </div>
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="w-full text-left px-4 py-2 text-sm text-light-txt-primary hover:bg-light-secondary/10 dark:text-dark-txt-primary dark:hover:bg-dark-secondary/20 transition-colors duration-200"
-              >
-                Sign out
-              </button>
+              <div className="py-1">
+                <a
+                  href="/profile"
+                  className="flex items-center px-4 py-2 text-sm text-light-txt-primary hover:text-light-accent hover:bg-light-secondary/10 dark:text-dark-txt-primary dark:hover:text-dark-accent dark:hover:bg-dark-secondary/20 transition-all duration-200"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  My Profile
+                </a>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 transition-all duration-200"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-4-4H3zm6.293 11.293a1 1 0 001.414 0L13 11.414l2.293 2.293a1 1 0 001.414-1.414l-2.293-2.293 2.293-2.293a1 1 0 00-1.414-1.414L13 8.586l-2.293-2.293a1 1 0 00-1.414 1.414L11.586 10l-2.293 2.293a1 1 0 000 1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Sign out
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -74,12 +196,48 @@ export default function LoginButton() {
     );
   }
 
+  // For mobile menu, render a simple sign in button
+  if (isMobile) {
+    return (
+      <button
+        onClick={handleSignIn}
+        className="flex items-center w-full text-left px-3 py-2 text-light-txt-secondary dark:text-dark-txt-secondary hover:bg-light-secondary/10 hover:text-light-accent dark:hover:bg-dark-secondary/20 dark:hover:text-dark-accent rounded-md transition-colors duration-200"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 mr-3"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z"
+            clipRule="evenodd"
+          />
+        </svg>
+        Sign in
+      </button>
+    );
+  }
+
   return (
     <div className="flex items-center space-x-2">
       <button
-        onClick={() => signIn("google")}
-        className="bg-light-secondary text-light-txt-primary hover:bg-light-secondary/90 dark:bg-dark-secondary dark:text-dark-txt-primary dark:hover:bg-dark-secondary/90 px-4 py-2 rounded-md text-sm font-medium"
+        onClick={handleSignIn}
+        className="bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:text-white dark:hover:bg-dark-accent-hover px-5 py-2 rounded-md text-sm font-medium shadow-sm transition-all duration-300 hover:shadow-md flex items-center gap-1"
       >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4 mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z"
+            clipRule="evenodd"
+          />
+        </svg>
         Sign in
       </button>
     </div>

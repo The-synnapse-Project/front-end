@@ -30,7 +30,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="favicon.svg" type="image/svg+xml" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col overflow-x-hidden bg-light-primary text-light-txt-primary dark:bg-dark-primary dark:text-dark-txt-primary transition-colors duration-200`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col overflow-x-hidden bg-light-background text-light-txt-primary dark:bg-dark-background dark:text-dark-txt-primary transition-colors duration-200`}
       >
         <Providers>
           <NavBar />
