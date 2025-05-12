@@ -24,7 +24,13 @@ export interface PersonResponse {
   name: string;
   surname: string;
   email: string;
+  role: Role;
   password_hash: string;
+}
+export enum Role {
+  Admin = "Admin",
+  Profesor = "Profesor",
+  Alumno = "Alumno",
 }
 
 // Permission interfaces

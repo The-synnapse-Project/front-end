@@ -27,7 +27,7 @@ export default function LoginPage() {
         console.log("Login error:", result.error);
         setError("Invalid email or password");
       } else if (result?.ok) {
-        router.push("/");
+        router.push("/dashboard");
         router.refresh();
       }
     } catch (error) {
@@ -39,7 +39,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/" });
+    signIn("google", { callbackUrl: "/dashboard" });
   };
 
   return (
