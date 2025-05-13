@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { register } from "@/lib/api-client";
-import { Role } from "@/models/Permission";
+import { useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -16,6 +17,28 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { status } = useSession();
+
+  useEffect(() => {
+    // Redirigir al panel si el usuario ya está autenticado
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
+
+  // No renderizar el formulario de registro si el usuario está autenticado o mientras se verifica el estado de autenticación
+  if (status === "authenticated" || status === "loading") {
+    return (
+      <div className="flex h-screen overflow-hidden flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-light-secondary/30 border-t-light-accent dark:border-dark-secondary/30 dark:border-t-dark-accent shadow-md"></div>
+        <p className="mt-4 text-light-txt-secondary dark:text-dark-txt-secondary">
+          {status === "authenticated"
+            ? "Redirigiendo al panel..."
+            : "Cargando..."}
+        </p>
+      </div>
+    );
+  }
 
   const validateForm = () => {
     if (!name || !surname || !email || !password || !confirmPassword) {
@@ -28,14 +51,14 @@ export default function RegisterPage() {
       return false;
     }
 
-    // Simple email validation
+    // Validación simple de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError("Por favor, ingrese un correo electrónico válido.");
       return false;
     }
 
-    // Password strength validation
+    // Validación de fortaleza de contraseña
     if (password.length < 8) {
       setError("La contraseña debe tener al menos 8 caracteres.");
       return false;
@@ -53,12 +76,12 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // Register the user with our new API
+      // Registrar al usuario con nuestra nueva API
       const result = await register(name, surname, email, password);
 
       if (result?.status === "ok") {
         setSuccess(true);
-        // Redirect to login after 2 seconds
+        // Redirigir al inicio de sesión después de 2 segundos
         setTimeout(() => {
           router.push("/login");
         }, 2000);
@@ -71,7 +94,7 @@ export default function RegisterPage() {
         setError("Error al crear la cuenta. Inténtelo de nuevo.");
       }
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Error de registro:", error);
       setError(
         "Error al crear la cuenta. Por favor, inténtelo de nuevo más tarde.",
       );
@@ -80,9 +103,13 @@ export default function RegisterPage() {
     }
   };
 
+  const handleGoogleSignIn = () => {
+    signIn("google", { callbackUrl: "/dashboard" });
+  };
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
-      <div className="w-full max-w-md rounded-xl bg-white dark:bg-dark-primary p-8 shadow-lg border border-light-secondary/10 dark:border-dark-secondary/10 transition-all duration-300 animate-fade-in">
+    <div className="mt-16 fixed inset-0 flex overflow-hidden flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
+      <div className="w-full max-w-md rounded-xl bg-white dark:bg-dark-primary p-8 shadow-lg border border-light-secondary/10 dark:border-dark-secondary/10 transition-all duration-300 animate-fade-in overflow-y-auto max-h-screen">
         <div className="flex justify-center mb-6">
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover flex items-center justify-center text-white shadow-md">
             <svg
@@ -99,7 +126,7 @@ export default function RegisterPage() {
           Crear una nueva cuenta
         </h1>
         <p className="mb-6 text-center text-light-txt-secondary dark:text-dark-txt-secondary">
-          Regístrate para acceder a tu dashboard
+          Regístrate para acceder a tu panel de control
         </p>
 
         {error && (
@@ -285,16 +312,74 @@ export default function RegisterPage() {
             </button>
           </div>
         </form>
-
+        <div className="mt-8">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-light-secondary dark:border-dark-secondary transition-colors duration-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white dark:bg-dark-primary text-light-txt-secondary dark:text-dark-txt-secondary transition-colors duration-300">
+                O continuar con Google
+              </span>
+            </div>
+          </div>
+        </div>
         <div className="mt-6 text-center">
-          <p className="text-light-txt-secondary dark:text-dark-txt-secondary text-sm">
-            ¿Ya tienes una cuenta?{" "}
+          <button
+            onClick={handleGoogleSignIn}
+            className="w-full flex items-center justify-center gap-3 rounded-md border border-light-secondary/30 dark:border-dark-secondary/30 bg-white dark:bg-dark-secondary/20 px-4 py-3 text-gray-700 dark:text-gray-200 shadow-sm hover:bg-light-background dark:hover:bg-dark-secondary/30 hover:shadow-md transition-all duration-300"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              className="w-5 h-5"
+            >
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
+            </svg>
+            Registrate con Google
+          </button>
+
+          <p className="text-light-txt-secondary dark:text-dark-txt-secondary text-sm mt-5">
+            ¿Ya tienes una cuenta?
             <Link
               href="/login"
-              className="text-light-accent dark:text-dark-accent hover:text-light-accent-hover dark:hover:text-dark-accent-hover font-medium"
+              className="ml-2 text-light-accent dark:text-dark-accent hover:text-light-accent-hover dark:hover:text-dark-accent-hover font-medium"
             >
               Iniciar sesión
             </Link>
+          </p>
+          <p className="text-center mt-4 text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
+            Al registrarte, aceptas nuestros
+            <a
+              href="/terms"
+              className="text-light-accent dark:text-dark-accent hover:underline ml-1"
+            >
+              Términos de Servicio
+            </a>{" "}
+            y
+            <a
+              href="/privacy"
+              className="text-light-accent dark:text-dark-accent hover:underline ml-1"
+            >
+              Política de Privacidad
+            </a>
           </p>
         </div>
       </div>

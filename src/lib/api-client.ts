@@ -150,7 +150,7 @@ export async function loginWithCredentials(
  */
 export async function getPerson(id: string): Promise<PersonResponse | null> {
   try {
-    return await fetchWithErrorHandling(`${API_BASE_URL}/persons/${id}`);
+    return await fetchWithErrorHandling(`${API_BASE_URL}/api/person/${id}`);
   } catch (error) {
     console.error("Error getting person:", error);
     return null;
@@ -185,8 +185,19 @@ export async function createPerson(data: {
 
 export async function updatePerson(
   id: string,
-  data: { name?: string; surname?: string; email?: string; password?: string },
+  data: {
+    name?: string;
+    surname?: string;
+    email?: string;
+    password?: string;
+    role?: string;
+  },
 ): Promise<PersonResponse> {
+  let real_data = await getPerson(id);
+  if (real_data) {
+    data = { ...real_data, ...data };
+  }
+
   return await fetchWithErrorHandling(`${API_BASE_URL}/api/person/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -203,11 +214,11 @@ export async function deletePerson(id: string): Promise<void> {
 // Permission functions
 
 export async function getAllPermissions(): Promise<PermissionResponse[]> {
-  return await fetchWithErrorHandling(`${API_BASE_URL}/api/permissions`);
+  return await fetchWithErrorHandling(`${API_BASE_URL}/api/permission`);
 }
 
 export async function getPermission(id: string): Promise<PermissionResponse> {
-  return await fetchWithErrorHandling(`${API_BASE_URL}/api/permissions/${id}`);
+  return await fetchWithErrorHandling(`${API_BASE_URL}/api/permission/${id}`);
 }
 
 export async function getPermissionByPerson(
@@ -232,6 +243,10 @@ export async function updatePermission(
   id: string,
   data: Partial<CreatePermissionRequest>,
 ): Promise<PermissionResponse> {
+  let real_data = await getPermission(id);
+  if (real_data) {
+    data = { ...real_data, ...data };
+  }
   return await fetchWithErrorHandling(`${API_BASE_URL}/api/permission/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -367,6 +382,10 @@ export async function updateEntry(
   id: string,
   data: { person_id?: string; instant?: string; action?: string },
 ): Promise<EntryResponse> {
+  let real_data = await getEntry(id);
+  if (real_data) {
+    data = { ...real_data, ...data };
+  }
   return await fetchWithErrorHandling(`${API_BASE_URL}/api/entry/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

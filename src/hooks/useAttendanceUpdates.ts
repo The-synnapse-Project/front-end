@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import wsClient from "@/lib/websocket-client";
 import { Entry } from "@/models/Entry";
 import { Person } from "@/models/Person";
 import { Permission } from "@/models/Permission";
@@ -27,7 +26,6 @@ interface AttendanceUpdateOptions {
 }
 
 export function useAttendanceUpdates(options: AttendanceUpdateOptions = {}) {
-  const [isConnected, setIsConnected] = useState(wsClient.isConnected());
   const [lastEntry, setLastEntry] = useState<Entry | null>(null);
   const [lastPerson, setLastPerson] = useState<Person | null>(null);
   const [lastPermission, setLastPermission] = useState<Permission | null>(null);
@@ -104,8 +102,6 @@ export function useAttendanceUpdates(options: AttendanceUpdateOptions = {}) {
     code?: number;
     reason?: string;
   }) => {
-    setIsConnected(data.status === "connected");
-
     if (data.status === "connected" && showToasts) {
       toast.success("Connected to real-time updates");
     } else if (data.status === "disconnected" && showToasts) {
@@ -132,38 +128,9 @@ export function useAttendanceUpdates(options: AttendanceUpdateOptions = {}) {
     }
   };
 
-  // Connect and set up event listeners
-  useEffect(() => {
-    if (autoConnect) {
-      wsClient.connect().catch(console.error);
-    }
-
-    wsClient.on("entry", handleEntry);
-    wsClient.on("person", handlePerson);
-    wsClient.on("permission", handlePermission);
-    wsClient.on("connection", handleConnection);
-    wsClient.on("error", handleError);
-
-    // Cleanup on unmount
-    return () => {
-      wsClient.off("entry", handleEntry);
-      wsClient.off("person", handlePerson);
-      wsClient.off("permission", handlePermission);
-      wsClient.off("connection", handleConnection);
-      wsClient.off("error", handleError);
-    };
-  }, []);
-
-  // Method to manually connect/disconnect
-  const connect = () => wsClient.connect();
-  const disconnect = () => wsClient.disconnect();
-
   return {
-    isConnected,
     lastEntry,
     lastPerson,
     lastPermission,
-    connect,
-    disconnect,
   };
 }

@@ -19,24 +19,27 @@ Synnapse is an intelligent classroom platform that enhances the teaching and lea
 ## ✨ Features
 
 - **Dual Authentication System**
+
   - Sign in with Google OAuth
   - Traditional email/password authentication
   - Secure password recovery process
 
 - **Role-Based Experience**
+
   - Custom dashboards for Admin, Teacher (Profesor), and Student (Alumno) roles
   - Permission-based access control to features and data
   - Personalized content based on user role
 
 - **Modern, Responsive UI**
+
   - Clean, intuitive interface that works on all devices
   - Dark/light theme support with seamless transitions
   - Animated components for enhanced user experience
   - Mobile-optimized layout with slide-out navigation
 
 - **Real-time Capabilities**
+
   - Attendance tracking and updates
-  - WebSocket integrations for live classroom data
 
 - **Comprehensive User Management**
   - Profile viewing and editing
@@ -46,27 +49,30 @@ Synnapse is an intelligent classroom platform that enhances the teaching and lea
 ## 🛠️ Tech Stack
 
 - **Core Technologies**
+
   - [Next.js](https://nextjs.org/) - React framework with server-side rendering
   - [React](https://reactjs.org/) - UI component library
   - [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
 
 - **Styling & UI**
+
   - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
   - Custom animations and transitions
   - Responsive design system
 
 - **Authentication & Authorization**
+
   - [NextAuth.js](https://next-auth.js.org/) - Authentication solution for Next.js
   - JWT token handling
   - Role-based authorization
 
 - **State Management**
+
   - React Context API for global state
   - Custom hooks for shared logic
 
 - **API Integration**
   - Custom Fetch-based client for Rocket API
-  - WebSocket client for real-time updates
 
 ## 🚀 Getting Started
 
@@ -154,16 +160,13 @@ bun start
 The frontend connects to a Rocket-based API for all data services. Key integration points:
 
 - **API Client**: Located at `src/lib/api-client.ts`
+
   - Handles all HTTP requests to the backend
   - Includes authentication headers and error handling
 
 - **Auth Integration**: Located at `src/app/api/auth/[...nextauth]/route.ts`
   - Configures NextAuth.js with dual providers
   - Manages session handling and token refreshing
-
-- **WebSocket Client**: Located at `src/lib/websocket-client.ts`
-  - Establishes real-time connections for live updates
-  - Manages connection state and reconnect logic
 
 ## 🔐 Authentication Flow
 

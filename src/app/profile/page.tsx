@@ -36,7 +36,7 @@ export default function ProfilePage() {
     <AuthGuard>
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover bg-clip-text text-transparent">
-          My Profile
+          Mi Perfil
         </h1>
 
         {isLoading ? (
@@ -44,7 +44,7 @@ export default function ProfilePage() {
             <div className="flex flex-col items-center">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-light-secondary/30 border-t-light-accent dark:border-dark-secondary/30 dark:border-t-dark-accent shadow-md mb-4"></div>
               <p className="text-light-txt-secondary dark:text-dark-txt-secondary">
-                Loading profile data...
+                Cargando datos del perfil...
               </p>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function ProfilePage() {
                     clipRule="evenodd"
                   />
                 </svg>
-                Account Information
+                Información de la Cuenta
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -135,7 +135,7 @@ export default function ProfilePage() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    Name
+                    Nombre
                   </dt>
                   <dd className="text-light-txt-primary dark:text-dark-txt-primary font-medium text-lg">
                     {session?.user?.name ?? "Unknown"}
@@ -152,7 +152,7 @@ export default function ProfilePage() {
                     >
                       <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                     </svg>
-                    Surname
+                    Apellido
                   </dt>
                   <dd className="text-light-txt-primary dark:text-dark-txt-primary font-medium text-lg">
                     {session?.user?.surname ?? "Unknown"}
@@ -178,11 +178,11 @@ export default function ProfilePage() {
                     </span>
                     {session?.user?.email ? (
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        verified
+                        verificado
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        not verified
+                        no verificado
                       </span>
                     )}
                   </dd>
@@ -202,12 +202,12 @@ export default function ProfilePage() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    Account ID
+                    ID de Cuenta
                   </dt>
                   <dd className="font-mono text-sm text-light-txt-secondary dark:text-dark-txt-secondary bg-light-background/80 dark:bg-dark-secondary/20 p-2 rounded overflow-x-auto">
                     {session?.user?.apiToken ??
                       session?.user?.id ??
-                      "Not available"}
+                      "No disponible"}
                   </dd>
                 </div>
 
@@ -225,7 +225,7 @@ export default function ProfilePage() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    Authentication Method
+                    Método de Autenticación
                   </dt>
                   <dd className="mt-2 flex items-center text-light-txt-primary dark:text-dark-txt-primary">
                     {session?.user?.image ? (
@@ -241,7 +241,7 @@ export default function ProfilePage() {
                         <div>
                           <span className="font-medium">Google</span>
                           <p className="text-xs text-light-txt-secondary dark:text-dark-txt-secondary">
-                            Your Google account is linked and secured
+                            Tu cuenta de Google está vinculada y segura
                           </p>
                         </div>
                       </div>
@@ -256,9 +256,9 @@ export default function ProfilePage() {
                           <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" />
                         </svg>
                         <div>
-                          <span className="font-medium">Email/Password</span>
+                          <span className="font-medium">Email/Contraseña</span>
                           <p className="text-xs text-light-txt-secondary dark:text-dark-txt-secondary">
-                            You can log in using your email and password
+                            Puedes iniciar sesión usando tu email y contraseña
                           </p>
                         </div>
                       </div>
@@ -269,7 +269,7 @@ export default function ProfilePage() {
 
               <div className="mt-8 flex justify-end">
                 <button className="px-4 py-2 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-md shadow-sm hover:shadow-md transition-all duration-300">
-                  Update Profile
+                  Actualizar Perfil
                 </button>
               </div>
             </div>

@@ -30,16 +30,20 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
       let hasPermission = false;
 
       if (Array.isArray(requiredRole)) {
-        // Check if user's role is in the array of required roles
-        hasPermission = requiredRole.includes(session.user.role);
+        // Check if user's role is in the array of required roles - case insensitive
+        hasPermission = requiredRole.some(
+          (role) => role.toLowerCase() === session.user.role?.toLowerCase(),
+        );
       } else {
-        // Check if user's role matches the required role
-        hasPermission = session.user.role === requiredRole;
+        // Check if user's role matches the required role - case insensitive
+        hasPermission =
+          session.user.role.toLowerCase() === requiredRole.toLowerCase();
       }
 
       if (!hasPermission) {
         // Redirect to appropriate dashboard based on actual role
         if (session.user.role) {
+          // Convertir a minúsculas para URLs: Admin → admin, Profesor → profesor, Alumno → alumno
           router.push(`/dashboard/${session.user.role.toLowerCase()}`);
         } else {
           router.push("/");

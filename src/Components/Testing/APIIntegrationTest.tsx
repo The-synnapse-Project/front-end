@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useAttendanceUpdates } from "@/hooks/useAttendanceUpdates";
+import React, { useState, useEffect, use } from "react";
 import { Entry } from "@/models/Entry";
 import { Person } from "@/models/Person";
 import { Permission } from "@/models/Permission";
+import { getAllPersons } from "@/lib/api-client";
 
 interface IntegrationTestCardProps {
   title: string;
@@ -30,61 +30,28 @@ const IntegrationTestCard: React.FC<IntegrationTestCardProps> = ({
 };
 
 export default function APIIntegrationTest() {
-  const [wsStatus, setWsStatus] = useState<"pending" | "success" | "error">(
-    "pending",
-  );
   const [apiStatus, setApiStatus] = useState<"pending" | "success" | "error">(
     "pending",
-  );
-  const [wsMessage, setWsMessage] = useState<string>(
-    "Attempting to connect to WebSocket...",
   );
   const [apiMessage, setApiMessage] = useState<string>(
     "Testing API connection...",
   );
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [persons, setPersons] = useState<Person[]>([]);
-  const [permissions, setPermissions] = useState<Permission[]>([]);
 
-  // Test WebSocket connection
-  const { isConnected, lastEntry, lastPerson, lastPermission } =
-    useAttendanceUpdates({
-      onEntry: (entry) => {
-        setEntries((prev) => [...prev, entry]);
-        setWsStatus("success");
-        setWsMessage(
-          `Successfully received entry update for person ${entry.person_id}`,
-        );
-      },
-      onPerson: (person) => {
-        setPersons((prev) => [...prev, person]);
-        setWsStatus("success");
-        setWsMessage(`Successfully received person update: ${person.name}`);
-      },
-      onPermission: (permission) => {
-        setPermissions((prev) => [...prev, permission]);
-        setWsStatus("success");
-        setWsMessage(
-          `Successfully received permission update for person ${permission.personId}`,
-        );
-      },
-      onConnection: (status) => {
-        if (status.status === "connected") {
-          setWsStatus("success");
-          setWsMessage("WebSocket connection established successfully");
-        } else {
-          setWsStatus("error");
-          setWsMessage(
-            `WebSocket disconnected: ${status.reason || "Unknown reason"}`,
-          );
+  const [isApiOk, setIsApiOk] = useState<number>(0); // 0 loading, 1 ok, 2 error
+
+  useEffect(() => {
+    async function testApi() {
+      try {
+        const persons = await getAllPersons();
+        if (persons) {
+          setIsApiOk(1);
         }
-      },
-      onError: (error) => {
-        setWsStatus("error");
-        setWsMessage(`WebSocket error: ${error.message || "Unknown error"}`);
-      },
-    });
-
+      } catch (error) {
+        setIsApiOk(2);
+      }
+    }
+    testApi();
+  }, []);
   // Test REST API connection
   useEffect(() => {
     async function testApiConnection() {
@@ -121,65 +88,6 @@ export default function APIIntegrationTest() {
           status={apiStatus}
           message={apiMessage}
         />
-        <IntegrationTestCard
-          title="WebSocket Connection"
-          status={wsStatus}
-          message={wsMessage}
-        />
-      </div>
-
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          Real-time Updates
-        </h3>
-        <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-            WebSocket Status:{" "}
-            <span className={isConnected ? "text-green-500" : "text-red-500"}>
-              {isConnected ? "Connected" : "Disconnected"}
-            </span>
-          </p>
-
-          {lastEntry && (
-            <div className="mb-4">
-              <h4 className="font-medium text-gray-700 dark:text-gray-200">
-                Last Entry Update:
-              </h4>
-              <pre className="bg-gray-200 dark:bg-gray-600 p-2 rounded text-xs overflow-x-auto">
-                {JSON.stringify(lastEntry, null, 2)}
-              </pre>
-            </div>
-          )}
-
-          {lastPerson && (
-            <div className="mb-4">
-              <h4 className="font-medium text-gray-700 dark:text-gray-200">
-                Last Person Update:
-              </h4>
-              <pre className="bg-gray-200 dark:bg-gray-600 p-2 rounded text-xs overflow-x-auto">
-                {JSON.stringify(lastPerson, null, 2)}
-              </pre>
-            </div>
-          )}
-
-          {lastPermission && (
-            <div className="mb-4">
-              <h4 className="font-medium text-gray-700 dark:text-gray-200">
-                Last Permission Update:
-              </h4>
-              <pre className="bg-gray-200 dark:bg-gray-600 p-2 rounded text-xs overflow-x-auto">
-                {JSON.stringify(lastPermission, null, 2)}
-              </pre>
-            </div>
-          )}
-
-          {!lastEntry && !lastPerson && !lastPermission && (
-            <p className="text-gray-500 dark:text-gray-400 text-sm italic">
-              No real-time updates received yet. Updates will appear here when
-              they arrive.
-            </p>
-          )}
-        </div>
       </div>
 
       <div>
@@ -214,22 +122,14 @@ export default function APIIntegrationTest() {
             </tr>
             <tr>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                WebSocket Connection
+                Rocket API
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                {isConnected ? "✅ Connected" : "❌ Disconnected"}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                Real-time Updates
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                {entries.length > 0 ||
-                persons.length > 0 ||
-                permissions.length > 0
+                {isApiOk == 1
                   ? "✅ Working"
-                  : "🔄 Waiting for updates"}
+                  : isApiOk == 2
+                    ? "🔴 Error"
+                    : "🔄 Pending"}
               </td>
             </tr>
             <tr>

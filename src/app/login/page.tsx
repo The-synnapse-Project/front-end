@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -10,6 +11,28 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { status } = useSession();
+
+  useEffect(() => {
+    // Redirigir al dashboard si el usuario ya está autenticado
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
+
+  // No renderizar el formulario de inicio de sesión si el usuario está autenticado o mientras se verifica el estado de autenticación
+  if (status === "authenticated" || status === "loading") {
+    return (
+      <div className="fixed inset-0 flex overflow-hidden flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-light-secondary/30 border-t-light-accent dark:border-dark-secondary/30 dark:border-t-dark-accent shadow-md"></div>
+        <p className="mt-4 text-light-txt-secondary dark:text-dark-txt-secondary">
+          {status === "authenticated"
+            ? "Redirigiendo al panel..."
+            : "Cargando..."}
+        </p>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,15 +47,15 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        console.log("Login error:", result.error);
-        setError("Invalid email or password");
+        console.log("Error de inicio de sesión:", result.error);
+        setError("Correo electrónico o contraseña inválidos");
       } else if (result?.ok) {
         router.push("/dashboard");
         router.refresh();
       }
     } catch (error) {
-      setError("An error occurred. Please try again.");
-      console.error("Login error:", error);
+      setError("Ha ocurrido un error. Por favor, inténtelo de nuevo.");
+      console.error("Error de inicio de sesión:", error);
     } finally {
       setIsLoading(false);
     }
@@ -43,8 +66,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
-      <div className="w-full max-w-md rounded-xl bg-white dark:bg-dark-primary p-8 shadow-lg border border-light-secondary/10 dark:border-dark-secondary/10 transition-all duration-300 animate-fade-in">
+    <div className="fixed inset-0 flex overflow-hidden flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
+      <div className="w-full max-w-md rounded-xl bg-white dark:bg-dark-primary p-8 shadow-lg border border-light-secondary/10 dark:border-dark-secondary/10 transition-all duration-300 animate-fade-in overflow-y-auto max-h-[90vh]">
         <div className="flex justify-center mb-6">
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover flex items-center justify-center text-white shadow-md">
             <svg
@@ -62,10 +85,10 @@ export default function LoginPage() {
           </div>
         </div>
         <h1 className="mb-2 text-center text-2xl font-bold text-light-txt-primary dark:text-dark-txt-primary transition-colors duration-300">
-          Welcome to Synnapse
+          Bienvenido a Synnapse
         </h1>
         <p className="mb-6 text-center text-light-txt-secondary dark:text-dark-txt-secondary">
-          Sign in to access your account
+          Inicia sesión para acceder a tu cuenta
         </p>
 
         {error && (
@@ -85,7 +108,7 @@ export default function LoginPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium">Authentication Error</h3>
+              <h3 className="font-medium">Error de autenticación</h3>
               <p className="text-sm mt-1">{error}</p>
             </div>
           </div>
@@ -97,7 +120,7 @@ export default function LoginPage() {
               htmlFor="email"
               className="block text-sm font-medium text-light-txt-secondary dark:text-dark-txt-secondary transition-colors duration-300"
             >
-              Email
+              Correo electrónico
             </label>
             <input
               id="email"
@@ -114,7 +137,7 @@ export default function LoginPage() {
               htmlFor="password"
               className="block text-sm font-medium text-light-txt-secondary dark:text-dark-txt-secondary transition-colors duration-300"
             >
-              Password
+              Contraseña
             </label>
             <input
               id="password"
@@ -154,7 +177,7 @@ export default function LoginPage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Signing in...
+                  Iniciando sesión...
                 </span>
               ) : (
                 <span className="flex items-center justify-center">
@@ -170,25 +193,10 @@ export default function LoginPage() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Sign in with Email
+                  Iniciar sesión con email
                 </span>
               )}
             </button>
-
-            <div className="text-center">
-              <a
-                href="/register"
-                className="text-sm text-light-accent dark:text-dark-accent hover:text-light-accent-hover dark:hover:text-dark-accent-hover mr-4"
-              >
-                Register
-              </a>
-              <a
-                href="/change-password"
-                className="text-sm text-light-accent dark:text-dark-accent hover:text-light-accent-hover dark:hover:text-dark-accent-hover"
-              >
-                Change Password
-              </a>
-            </div>
           </div>
         </form>
 
@@ -199,7 +207,7 @@ export default function LoginPage() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-white dark:bg-dark-primary text-light-txt-secondary dark:text-dark-txt-secondary transition-colors duration-300">
-                Or continue with Google
+                O continuar con Google
               </span>
             </div>
           </div>
@@ -233,23 +241,31 @@ export default function LoginPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Sign in with Google
+              Iniciar sesión con Google
             </button>
-
+            <p className="text-light-txt-secondary dark:text-dark-txt-secondary text-sm mt-5 w-full text-center">
+              ¿No tienes una cuenta?
+              <Link
+                href="/register"
+                className="ml-2 text-light-accent dark:text-dark-accent hover:text-light-accent-hover dark:hover:text-dark-accent-hover font-medium"
+              >
+                Registrarse
+              </Link>
+            </p>
             <p className="text-center mt-6 text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
-              By signing in, you agree to our
+              Al iniciar sesión, aceptas nuestros
               <a
                 href="#"
                 className="text-light-accent dark:text-dark-accent hover:underline ml-1"
               >
-                Terms of Service
+                Términos de Servicio
               </a>{" "}
-              and
+              y
               <a
                 href="#"
                 className="text-light-accent dark:text-dark-accent hover:underline ml-1"
               >
-                Privacy Policy
+                Política de Privacidad
               </a>
             </p>
           </div>

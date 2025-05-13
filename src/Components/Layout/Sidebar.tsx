@@ -15,30 +15,30 @@ const Sidebar = () => {
   const pathname = usePathname();
   const { user, permissions, role } = useAuth();
 
-  // Define navigation items based on roles
+  // Definir elementos de navegación basados en roles
   const navItems: NavItem[] = [
-    { href: "/dashboard", label: "Dashboard" },
+    { href: "/dashboard", label: "Panel Principal" },
     {
       href: "/dashboard/alumno",
-      label: "Student Portal",
+      label: "Portal del Estudiante",
       requiredRoles: [Role.ALUMNO],
     },
     {
       href: "/dashboard/profesor",
-      label: "Teacher Portal",
+      label: "Portal del Profesor",
       requiredRoles: [Role.PROFESOR],
     },
     {
       href: "/dashboard/admin",
-      label: "Admin Panel",
+      label: "Panel de Administración",
       requiredRoles: [Role.ADMIN],
     },
-    { href: "/profile", label: "My Profile" },
+    { href: "/profile", label: "Mi Perfil" },
   ];
 
   const userRoles = role;
 
-  // Filter navigation items based on user roles
+  // Filtrar elementos de navegación basados en los roles del usuario
   const filteredNavItems = navItems.filter((item) => {
     if (!item.requiredRoles) return true;
     return item.requiredRoles.some((role) => role === userRoles);

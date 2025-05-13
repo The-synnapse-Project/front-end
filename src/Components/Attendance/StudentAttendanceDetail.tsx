@@ -205,7 +205,7 @@ export default function StudentAttendanceDetail({
           {/* Current status card */}
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Current Status</h3>
+              <h3 className="text-lg font-semibold">Estado Actual</h3>
               {onMarkAttendance && (
                 <button
                   onClick={handleMarkAttendance}
@@ -215,7 +215,7 @@ export default function StudentAttendanceDetail({
                       : "bg-green-500 hover:bg-green-600"
                   }`}
                 >
-                  {studentStatus.isPresent ? "Mark Exit" : "Mark Entry"}
+                  {studentStatus.isPresent ? "Marcar Salida" : "Marcar Entrada"}
                 </button>
               )}
             </div>
@@ -228,13 +228,14 @@ export default function StudentAttendanceDetail({
                     : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                 }`}
               >
-                {studentStatus.isPresent ? "Present" : "Absent"}
+                {studentStatus.isPresent ? "Presente" : "Ausente"}
               </span>
 
               {studentStatus.lastEntryTime && (
                 <span className="ml-3 text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
-                  Last update: {formatDateDisplay(studentStatus.lastEntryTime)}{" "}
-                  at {studentStatus.lastEntryTime.toLocaleTimeString()}
+                  Última actualización:{" "}
+                  {formatDateDisplay(studentStatus.lastEntryTime)} a las{" "}
+                  {studentStatus.lastEntryTime.toLocaleTimeString()}
                   {studentStatus.entry && (
                     <span className="ml-2 font-medium">
                       ({studentStatus.entry.action})
@@ -248,24 +249,24 @@ export default function StudentAttendanceDetail({
           {/* Monthly statistics */}
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4">
-              {stats.currentMonth} Statistics
+              Estadísticas de {stats.currentMonth}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-light-background dark:bg-dark-background p-4 rounded">
-                <div className="text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
-                  Days Present
-                </div>
-                <div className="text-2xl font-bold">
-                  {stats.daysPresent}{" "}
-                  <span className="text-sm font-normal">
-                    of {stats.daysInMonth}
-                  </span>
-                </div>
+              <div className="text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
+                Días Presente
               </div>
+              <div className="text-2xl font-bold">
+                {stats.daysPresent}{" "}
+                <span className="text-sm font-normal">
+                  de {stats.daysInMonth}
+                </span>
+              </div>
+            </div>
 
               <div className="bg-light-background dark:bg-dark-background p-4 rounded">
                 <div className="text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
-                  Attendance Rate
+                  Tasa de Asistencia
                 </div>
                 <div className="text-2xl font-bold">
                   {stats.attendanceRate}%
@@ -274,7 +275,7 @@ export default function StudentAttendanceDetail({
 
               <div className="bg-light-background dark:bg-dark-background p-4 rounded">
                 <div className="text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
-                  Total Entries
+                  Total de Registros
                 </div>
                 <div className="text-2xl font-bold">{entries.length}</div>
               </div>
@@ -283,7 +284,9 @@ export default function StudentAttendanceDetail({
 
           {/* Attendance history */}
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">Attendance History</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Historial de Asistencia
+            </h3>
 
             <div className="mb-4">
               <DatePicker
@@ -291,7 +294,7 @@ export default function StudentAttendanceDetail({
                 onDateChange={setDateFilter}
                 className="max-w-xs"
                 allowClear
-                placeholder="Filter by date"
+                placeholder="Filtrar por fecha"
               />
             </div>
 
@@ -304,19 +307,19 @@ export default function StudentAttendanceDetail({
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                       >
-                        Date
+                        Fecha
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                       >
-                        Time
+                        Hora
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                       >
-                        Action
+                        Acción
                       </th>
                     </tr>
                   </thead>
@@ -354,10 +357,10 @@ export default function StudentAttendanceDetail({
               </div>
             ) : (
               <div className="text-center py-8 text-light-txt-secondary dark:text-dark-txt-secondary">
-                No attendance records found for{" "}
+                No se encontraron registros de asistencia para{" "}
                 {dateFilter
                   ? formatDateDisplay(new Date(dateFilter))
-                  : "this student"}
+                  : "este estudiante"}
                 .
               </div>
             )}

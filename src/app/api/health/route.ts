@@ -1,4 +1,3 @@
-"use client";
 import { NextResponse } from "next/server";
 
 // Health check endpoint to verify API connectivity

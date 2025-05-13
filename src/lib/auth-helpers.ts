@@ -9,6 +9,7 @@ import {
   getAllPersons,
   getPermissionByPerson,
   createPermission,
+  getPerson,
 } from "@/lib/api-client";
 import { Permission, Role } from "@/models/Permission";
 
@@ -48,6 +49,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name,
               surname: user.surname,
               email: user.email,
+              role: user.role,
             };
           }
 
@@ -80,6 +82,7 @@ export const authOptions: NextAuthOptions = {
             // User exists, use their API ID
             token.apiId = existingUser.id;
             token.surname = existingUser.surname;
+            token.role = existingUser.role; // Also store the user's role
           } else {
             // User doesn't exist, create them
             const nameParts = user.name?.split(" ") || ["User", ""];
@@ -115,6 +118,9 @@ export const authOptions: NextAuthOptions = {
                   admin_panel: defaultPermission.adminPanel,
                   edit_permissions: defaultPermission.editPermissions,
                 });
+
+                // Set default role for new users
+                token.role = Role.ALUMNO;
               }
             }
           }
@@ -133,7 +139,7 @@ export const authOptions: NextAuthOptions = {
                 adminPanel: permissions.adminPanel,
                 editPermissions: permissions.editPermissions,
               };
-              token.role = permissions.getRole();
+              token.role = (await getPerson(token.apiId as string))?.role;
             }
           }
         } catch (error) {
@@ -159,7 +165,7 @@ export const authOptions: NextAuthOptions = {
                 adminPanel: permissions.adminPanel,
                 editPermissions: permissions.editPermissions,
               };
-              token.role = permissions.getRole();
+              token.role = (await getPerson(user.id))?.role;
             }
           } catch (error) {
             console.error("Error fetching user permissions:", error);
@@ -185,7 +191,11 @@ export const authOptions: NextAuthOptions = {
           adminPanel: boolean;
           editPermissions: boolean;
         } | null;
-        session.user.role = token.role as Role | null;
+
+        // Add role to session
+        if (token.role) {
+          session.user.role = token.role as Role;
+        }
       }
       return session;
     },

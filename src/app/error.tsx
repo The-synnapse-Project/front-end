@@ -11,7 +11,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
+    // Registrar el error en un servicio de informes de errores
     console.error(error);
   }, [error]);
 
@@ -37,23 +37,23 @@ export default function Error({
               </svg>
             </div>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Something went wrong</h1>
+          <h1 className="text-3xl font-bold mb-2">Algo ha salido mal</h1>
           <p className="text-light-txt-secondary dark:text-dark-txt-secondary mb-8">
-            We're sorry, but something unexpected happened. You can try to reset
-            the application or return to the homepage.
+            Lo sentimos, pero ha ocurrido algo inesperado. Puedes intentar reiniciar
+            la aplicación o volver a la página principal.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <button
               onClick={reset}
               className="px-6 py-3 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-md shadow-sm hover:shadow-md transition-all duration-300 w-full sm:w-auto"
             >
-              Try Again
+              Intentar de nuevo
             </button>
             <Link
               href="/"
               className="px-6 py-3 bg-transparent border border-light-accent text-light-accent hover:bg-light-accent/10 dark:border-dark-accent dark:text-dark-accent dark:hover:bg-dark-accent/10 rounded-md transition-all duration-300 w-full sm:w-auto"
             >
-              Back to Home
+              Volver al inicio
             </Link>
           </div>
         </div>

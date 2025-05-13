@@ -39,7 +39,7 @@ export default function AttendanceReport({
         setError(null);
       } catch (error) {
         console.error("Error loading attendance stats:", error);
-        setError("Failed to load attendance statistics");
+        setError("Error al cargar las estadísticas de asistencia");
       } finally {
         setLoading(false);
       }
@@ -74,7 +74,7 @@ export default function AttendanceReport({
       }
     } catch (error) {
       console.error("Error exporting attendance data:", error);
-      setError("Failed to export attendance data");
+      setError("Error al exportar los datos de asistencia");
     }
   };
 
@@ -135,7 +135,7 @@ export default function AttendanceReport({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
         <h3 className="text-lg font-semibold">
-          Attendance Report: {formatDateDisplay(new Date(startDate))} -{" "}
+          Informe de Asistencia: {formatDateDisplay(new Date(startDate))} -{" "}
           {formatDateDisplay(new Date(endDate))}
         </h3>
 
@@ -144,13 +144,13 @@ export default function AttendanceReport({
             onClick={() => handleExport("csv")}
             className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-light-accent dark:bg-dark-accent hover:bg-light-accent-hover dark:hover:bg-dark-accent-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-accent dark:focus:ring-dark-accent"
           >
-            Export CSV
+            Exportar CSV
           </button>
           <button
             onClick={() => handleExport("json")}
             className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-light-accent dark:bg-dark-accent hover:bg-light-accent-hover dark:hover:bg-dark-accent-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-accent dark:focus:ring-dark-accent"
           >
-            Export JSON
+            Exportar JSON
           </button>
         </div>
       </div>
@@ -178,14 +178,14 @@ export default function AttendanceReport({
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-300">
-                  Present
+                  Presentes
                 </dt>
                 <dd className="flex items-baseline">
                   <div className="text-2xl font-semibold text-gray-900 dark:text-white">
                     {totalPresent}
                   </div>
                   <div className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                    of {totalPersons}
+                    de {totalPersons}
                   </div>
                 </dd>
               </div>
@@ -214,14 +214,14 @@ export default function AttendanceReport({
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-300">
-                  Absent
+                  Ausentes
                 </dt>
                 <dd className="flex items-baseline">
                   <div className="text-2xl font-semibold text-gray-900 dark:text-white">
                     {totalAbsent}
                   </div>
                   <div className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                    of {totalPersons}
+                    de {totalPersons}
                   </div>
                 </dd>
               </div>
@@ -250,7 +250,7 @@ export default function AttendanceReport({
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-300">
-                  Attendance Rate
+                  Tasa de Asistencia
                 </dt>
                 <dd className="flex items-baseline">
                   <div className="text-2xl font-semibold text-gray-900 dark:text-white">
@@ -283,14 +283,14 @@ export default function AttendanceReport({
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-300">
-                  Total Records
+                  Registros Totales
                 </dt>
                 <dd className="flex items-baseline">
                   <div className="text-2xl font-semibold text-gray-900 dark:text-white">
                     {entriesCount + exitsCount}
                   </div>
                   <div className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                    ({entriesCount} in, {exitsCount} out)
+                    ({entriesCount} entradas, {exitsCount} salidas)
                   </div>
                 </dd>
               </div>
@@ -302,7 +302,7 @@ export default function AttendanceReport({
       {/* Attendance Visualization - Simple bar chart */}
       <div className="bg-white shadow overflow-hidden sm:rounded-lg dark:bg-gray-800 p-6">
         <h4 className="text-base font-medium text-gray-900 dark:text-white mb-4">
-          Attendance Visualization
+          Visualización de Asistencia
         </h4>
         <div className="h-16 flex items-end space-x-2">
           <div
@@ -326,13 +326,13 @@ export default function AttendanceReport({
           <div className="flex items-center">
             <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Present: {attendanceRate}%
+              Presentes: {attendanceRate}%
             </span>
           </div>
           <div className="flex items-center">
             <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Absent: {100 - attendanceRate}%
+              Ausentes: {100 - attendanceRate}%
             </span>
           </div>
         </div>

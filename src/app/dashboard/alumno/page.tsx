@@ -169,10 +169,10 @@ function AlumnoDashboard() {
       <div className="bg-white dark:bg-dark-primary rounded-xl shadow-md transition-all duration-300 border border-light-secondary/10 dark:border-dark-secondary/10 overflow-hidden">
         <div className="p-6">
           <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover bg-clip-text text-transparent">
-            Student Dashboard
+            Panel del Estudiante
           </h1>
           <p className="text-light-txt-secondary dark:text-dark-txt-secondary mb-6">
-            Welcome, {user?.name}. View your attendance and courses here.
+            Bienvenido, {user?.name}. Consulta tu asistencia y cursos aquí.
           </p>
 
           {/* Student Navigation Tabs */}
@@ -187,7 +187,7 @@ function AlumnoDashboard() {
                       : "text-light-txt-secondary dark:text-dark-txt-secondary hover:text-light-accent dark:hover:text-dark-accent"
                   }`}
                 >
-                  Attendance
+                  Asistencia
                 </button>
               </li>
               <li>
@@ -199,7 +199,7 @@ function AlumnoDashboard() {
                       : "text-light-txt-secondary dark:text-dark-txt-secondary hover:text-light-accent dark:hover:text-dark-accent"
                   }`}
                 >
-                  My Courses
+                  Mis Cursos
                 </button>
               </li>
             </ul>
@@ -217,7 +217,7 @@ function AlumnoDashboard() {
                   {/* Current Status Card */}
                   <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                     <h2 className="text-xl font-semibold mb-4">
-                      Current Status
+                      Estado Actual
                     </h2>
                     <div className="flex items-center">
                       <span
@@ -227,12 +227,12 @@ function AlumnoDashboard() {
                             : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                         }`}
                       >
-                        {studentStatus.isPresent ? "Present" : "Absent"}
+                        {studentStatus.isPresent ? "Presente" : "Ausente"}
                       </span>
 
                       {studentStatus.lastEntryTime && (
                         <span className="ml-3 text-sm text-gray-600 dark:text-gray-400">
-                          Last update:{" "}
+                          Última actualización:{" "}
                           {formatDateDisplay(studentStatus.lastEntryTime)} at{" "}
                           {studentStatus.lastEntryTime.toLocaleTimeString()}
                           {studentStatus.entry && (
@@ -248,13 +248,13 @@ function AlumnoDashboard() {
                   {/* Monthly Stats Card */}
                   <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                     <h2 className="text-xl font-semibold mb-4">
-                      {stats.currentMonth} Statistics
+                      Estadísticas de {stats.currentMonth}
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {/* Days Present */}
                       <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                         <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                          Days Present
+                          Días Presente
                         </div>
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
                           {stats.daysPresent}{" "}
@@ -267,7 +267,7 @@ function AlumnoDashboard() {
                       {/* Attendance Rate */}
                       <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                         <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                          Attendance Rate
+                          Tasa de Asistencia
                         </div>
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
                           {stats.attendanceRate}%
@@ -277,7 +277,7 @@ function AlumnoDashboard() {
                       {/* Total Entries */}
                       <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                         <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                          Total Entries
+                          Total de Registros
                         </div>
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
                           {stats.totalEntries}
@@ -287,7 +287,7 @@ function AlumnoDashboard() {
                       {/* Total Hours */}
                       <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                         <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                          Hours Present
+                          Horas Presente
                         </div>
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
                           {stats.totalHoursPresent}
@@ -299,7 +299,7 @@ function AlumnoDashboard() {
                   {/* Attendance History */}
                   <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                     <h2 className="text-xl font-semibold mb-4">
-                      Attendance History
+                      Historial de Asistencia
                     </h2>
 
                     {/* Filters */}
@@ -308,10 +308,10 @@ function AlumnoDashboard() {
                         <DatePicker
                           selectedDate={dateFilter}
                           onDateChange={setDateFilter}
-                          label="Filter by date"
+                          label="Filtrar por fecha"
                           className="w-full"
                           allowClear
-                          placeholder="All dates"
+                          placeholder="Todas las fechas"
                         />
                       </div>
                       <div>
@@ -319,7 +319,7 @@ function AlumnoDashboard() {
                           htmlFor="action-filter"
                           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                          Filter by action
+                          Filtrar por acción
                         </label>
                         <select
                           id="action-filter"
@@ -327,9 +327,9 @@ function AlumnoDashboard() {
                           onChange={(e) => setActionFilter(e.target.value)}
                           className="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         >
-                          <option value="">All actions</option>
-                          <option value="entrada">Entry</option>
-                          <option value="salida">Exit</option>
+                          <option value="">Todas las acciones</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="salida">Salida</option>
                         </select>
                       </div>
                     </div>
@@ -344,19 +344,19 @@ function AlumnoDashboard() {
                                 scope="col"
                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                               >
-                                Date
+                                Fecha
                               </th>
                               <th
                                 scope="col"
                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                               >
-                                Time
+                                Hora
                               </th>
                               <th
                                 scope="col"
                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                               >
-                                Action
+                                Acción
                               </th>
                             </tr>
                           </thead>
@@ -394,9 +394,9 @@ function AlumnoDashboard() {
                       </div>
                     ) : (
                       <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                        No attendance records found{" "}
+                        No se encontraron registros de asistencia{" "}
                         {dateFilter &&
-                          `for ${formatDateDisplay(new Date(dateFilter))}`}
+                          `para ${formatDateDisplay(new Date(dateFilter))}`}
                         .
                       </div>
                     )}
@@ -408,9 +408,9 @@ function AlumnoDashboard() {
 
           {activeTab === "courses" && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-semibold mb-4">My Courses</h2>
+              <h2 className="text-xl font-semibold mb-4">Mis Cursos</h2>
               <p className="text-light-txt-secondary dark:text-dark-txt-secondary">
-                Coming soon: Course listing and materials.
+                Próximamente: Listado de cursos y materiales.
               </p>
             </div>
           )}

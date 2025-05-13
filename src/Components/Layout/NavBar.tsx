@@ -44,15 +44,15 @@ export default function NavBar() {
     };
   }, [isOpen]);
 
-  // Define navigation items with optional role restrictions
+  // Define los elementos de navegación con restricciones opcionales de roles
   const navItems: NavItem[] = [
-    { name: "Home", href: "/" },
+    { name: "Inicio", href: "/" },
     {
-      name: "Dashboard",
+      name: "Panel",
       href: userRole ? `/dashboard/${userRole.toLowerCase()}` : "/dashboard",
       roles: [Role.ADMIN, Role.PROFESOR, Role.ALUMNO],
     },
-    { name: "About", href: "/about" },
+    { name: "Acerca de", href: "/about" },
   ];
 
   // Filter nav items based on user role
@@ -94,12 +94,11 @@ export default function NavBar() {
             {/* Auth buttons and Theme Toggle */}
             <div className="hidden md:flex items-center space-x-3">
               <ThemeToggle />
-              <LoginButton isMobile={false} />
+              <LoginButton isMobile={false} onNavigate={handleCloseMenu} />
             </div>
             <div className="md:hidden flex items-center">
               <ThemeToggle />
               <button
-                type="button"
                 onClick={isOpen ? handleCloseMenu : handleOpenMenu}
                 className="ml-2 inline-flex items-center justify-center p-2 rounded-md text-light-txt-secondary dark:text-dark-txt-secondary hover:text-light-accent hover:bg-light-secondary/10 dark:hover:text-dark-accent dark:hover:bg-dark-secondary/20 focus:outline-none transition-colors duration-200"
               >
@@ -109,9 +108,9 @@ export default function NavBar() {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  aria-label="Open menu"
+                  aria-label="Abrir menú"
                 >
-                  <title>Open menu</title>
+                  <title>Abrir menú</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -125,9 +124,9 @@ export default function NavBar() {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  aria-label="Close menu"
+                  aria-label="Cerrar menú"
                 >
-                  <title>Close menu</title>
+                  <title>Cerrar menú</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -170,9 +169,9 @@ export default function NavBar() {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  aria-label="Close menu"
+                  aria-label="Cerrar menú"
                 >
-                  <title>Close menu</title>
+                  <title>Cerrar menú</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -196,7 +195,7 @@ export default function NavBar() {
 
               {/* Mobile auth buttons */}
               <div className="mt-4 pt-4 border-t border-light-secondary/20 dark:border-dark-secondary/20">
-                <LoginButton isMobile={true} />
+                <LoginButton isMobile={true} onNavigate={handleCloseMenu} />
               </div>
             </div>
           </div>

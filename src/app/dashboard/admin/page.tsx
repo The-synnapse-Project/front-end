@@ -2,19 +2,12 @@
 
 import { useAuth, withRoleAccess } from "@/lib/auth-guard";
 import { Role } from "@/models/Permission";
-import {
-  getRoleDisplayName,
-  getRoleStyleClass,
-  isRole,
-} from "@/lib/role-utils";
 import { useState, useEffect } from "react";
 import {
   getAllPersons,
-  getAllEntries,
   getEntriesByDate,
   getAllPermissions,
 } from "@/lib/api-client";
-import { handleApiRequest } from "@/lib/error-handler";
 import { useAttendanceUpdates } from "@/hooks/useAttendanceUpdates";
 import DatePicker from "@/Components/Common/DatePicker";
 import AttendanceSummary from "@/Components/Attendance/AttendanceSummary";
@@ -115,6 +108,10 @@ function AdminDashboard() {
   async function loadEntries(date: string) {
     try {
       const entriesData = await getEntriesByDate(date);
+      if (!entriesData) {
+        console.error(`No entries found for date ${date}`);
+        return;
+      }
       const loadedEntries = entriesData.map((e) => Entry.fromApiResponse(e));
       setEntries(loadedEntries);
     } catch (error) {
@@ -250,7 +247,7 @@ function AdminDashboard() {
                         const personPermission = userPermissions.find(
                           (p) => p.personId === person.id,
                         );
-                        const role = personPermission?.getRole() || "";
+                        const role = person.role || "";
                         const roleInfo = getRoleInfo(role);
 
                         return (

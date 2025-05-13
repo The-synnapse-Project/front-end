@@ -1,12 +1,43 @@
 import React, { useState } from "react";
 import { Person } from "@/models/Person";
 import { Permission, Role } from "@/models/Permission";
-import { updatePermission } from "@/lib/api-client";
+import { updatePermission, updatePerson } from "@/lib/api-client";
+import { getRoleDisplayName, getRoleStyleClass } from "@/lib/role-utils";
 
 interface PermissionManagementProps {
   persons: Person[];
   permissions: Permission[];
   onUpdate?: () => void;
+}
+
+// Componente para la celda de toggle de permisos
+interface PermissionToggleCellProps {
+  checked: boolean;
+  onChange: () => void;
+  disabled?: boolean;
+}
+
+function PermissionToggleCell({
+  checked,
+  onChange,
+  disabled = false,
+}: PermissionToggleCellProps) {
+  return (
+    <td className="px-3 py-4 whitespace-nowrap text-center">
+      <div className="flex justify-center">
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={onChange}
+            disabled={disabled}
+            className="sr-only peer"
+          />
+          <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:translate-x-[-100%] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+        </label>
+      </div>
+    </td>
+  );
 }
 
 export default function PermissionManagement({
@@ -18,7 +49,7 @@ export default function PermissionManagement({
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState<Role | "">("");
 
-  // Map permissions to their corresponding persons for easier management
+  // Mapear permisos a sus personas correspondientes para una gestión más fácil
   const permissionsMap = new Map<string, Permission>();
   permissions.forEach((permission) => {
     if (permission.personId) {
@@ -26,81 +57,46 @@ export default function PermissionManagement({
     }
   });
 
-  // Filter persons based on search and role
+  // Filtrar personas en base a la búsqueda y rol
   const filteredPersons = persons.filter((person) => {
     const fullName = `${person.name} ${person.surname || ""}`.toLowerCase();
-    const email = (person.email || "").toLowerCase();
-    const query = searchQuery.toLowerCase();
+    const email = person.email?.toLowerCase() || "";
+    const userPermission = permissionsMap.get(person.id || "");
+    const userRole = person.role || userPermission?.getRole();
+
+    // Aplicar filtrado por búsqueda
     const matchesSearch =
-      fullName.includes(query) || email.includes(query) || !query;
+      searchQuery === "" ||
+      fullName.includes(searchQuery.toLowerCase()) ||
+      email.includes(searchQuery.toLowerCase());
 
-    // Only filter by role if a role is selected
-    if (!filterRole) return matchesSearch;
+    // Aplicar filtrado por rol - Compatible con diferentes formatos de rol
+    const matchesRole =
+      filterRole === "" ||
+      userRole === filterRole ||
+      // Comparación insensible a mayúsculas/minúsculas
+      userRole?.toLowerCase() === filterRole?.toLowerCase();
 
-    // Get person's permission
-    const personPermission = permissionsMap.get(person.id || "");
-    if (!personPermission) return false;
+    console.log(
+      `Usuario ${person.name}, rol=${userRole}, buscando=${filterRole}, coincide=${matchesRole}`,
+    );
 
-    // Check if role matches
-    return personPermission.getRole() === filterRole && matchesSearch;
+    return matchesSearch && matchesRole;
   });
 
-  const handleRoleChange = async (personId: string, newRole: Role) => {
-    if (!personId) return;
-
-    setLoading(true);
-    try {
-      const existingPermission = permissionsMap.get(personId);
-
-      if (existingPermission) {
-        // Create new permission based on role
-        const updatedPermission = Permission.fromRole(
-          existingPermission.id,
-          personId,
-          newRole,
-        );
-
-        // Update permission in API
-        await updatePermission(
-          existingPermission.id,
-          updatedPermission.toApiRequest(),
-        );
-
-        // Update local map
-        permissionsMap.set(personId, updatedPermission);
-
-        // Call onUpdate callback if provided
-        if (onUpdate) onUpdate();
-      }
-    } catch (error) {
-      console.error(`Error updating permission for ${personId}:`, error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePermissionToggle = async (
+  // Manejar cambios en los permisos
+  const handlePermissionChange = async (
     personId: string,
-    permissionKey: keyof Permission,
+    permissionKey: string,
   ) => {
-    if (!personId || typeof permissionKey !== "string") return;
-    if (
-      ![
-        "dashboard",
-        "seeSelfHistory",
-        "seeOthersHistory",
-        "adminPanel",
-        "editPermissions",
-      ].includes(permissionKey)
-    )
-      return;
+    if (!personId || loading) return;
 
-    setLoading(true);
     try {
+      setLoading(true);
       const existingPermission = permissionsMap.get(personId);
 
       if (existingPermission) {
-        // Create updated permission
+        // Crear permiso actualizado
         const updatedPermission = new Permission(
           existingPermission.id,
           personId,
@@ -111,20 +107,39 @@ export default function PermissionManagement({
           },
         );
 
-        // Update permission in API
+        // Actualizar permiso en la API
         await updatePermission(
           existingPermission.id,
           updatedPermission.toApiRequest(),
         );
 
-        // Update local map
+        // Actualizar mapa local
         permissionsMap.set(personId, updatedPermission);
 
-        // Call onUpdate callback if provided
+        // Llamar a la función onUpdate si se proporciona
         if (onUpdate) onUpdate();
       }
     } catch (error) {
-      console.error(`Error updating permission for ${personId}:`, error);
+      console.error(`Error al actualizar el permiso para ${personId}:`, error);
+    } finally {
+      setLoading(false);
+    }
+  }; // Manejar cambios en el rol
+  const handleRoleChange = async (personId: string, newRole: string) => {
+    if (!personId || loading) return;
+
+    try {
+      setLoading(true);
+
+      console.log(`Actualizando rol para usuario ${personId} a: ${newRole}`);
+
+      // Actualizar el rol en la API
+      await updatePerson(personId, { role: newRole });
+
+      // Llamar a la función onUpdate si se proporciona
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      console.error(`Error al actualizar el rol para ${personId}:`, error);
     } finally {
       setLoading(false);
     }
@@ -132,21 +147,21 @@ export default function PermissionManagement({
 
   return (
     <div>
-      {/* Filters */}
+      {/* Filtros */}
       <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
         <div>
           <label
             htmlFor="permission-search"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Search Users
+            Buscar Usuarios
           </label>
           <input
             type="text"
             id="permission-search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name or email"
+            placeholder="Buscar por nombre o email"
             className="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
         </div>
@@ -155,7 +170,7 @@ export default function PermissionManagement({
             htmlFor="role-filter"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
-            Filter by Role
+            Filtrar por Rol
           </label>
           <select
             id="role-filter"
@@ -163,15 +178,15 @@ export default function PermissionManagement({
             onChange={(e) => setFilterRole(e.target.value as Role | "")}
             className="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
-            <option value="">All Roles</option>
-            <option value={Role.ADMIN}>Admin</option>
-            <option value={Role.PROFESOR}>Teacher</option>
-            <option value={Role.ALUMNO}>Student</option>
+            <option value="">Todos los Roles</option>
+            <option value={Role.ADMIN}>Administrador</option>
+            <option value={Role.PROFESOR}>Profesor</option>
+            <option value={Role.ALUMNO}>Estudiante</option>
           </select>
         </div>
       </div>
 
-      {/* Permissions Table */}
+      {/* Tabla de Permisos */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-800">
@@ -180,13 +195,13 @@ export default function PermissionManagement({
                 scope="col"
                 className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
               >
-                User
+                Usuario
               </th>
               <th
                 scope="col"
                 className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
               >
-                Role
+                Rol
               </th>
               <th
                 scope="col"
@@ -198,158 +213,140 @@ export default function PermissionManagement({
                 scope="col"
                 className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
               >
-                Self History
+                Historial Propio
               </th>
               <th
                 scope="col"
                 className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
               >
-                Others History
+                Historial Otros
               </th>
               <th
                 scope="col"
                 className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
               >
-                Admin Panel
+                Panel Admin
               </th>
               <th
                 scope="col"
                 className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
               >
-                Edit Permissions
+                Editar Permisos
               </th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-            {filteredPersons.length > 0 ? (
-              filteredPersons.map((person) => {
-                const permission = permissionsMap.get(person.id || "");
-                const role = permission?.getRole() || Role.ALUMNO;
+            {filteredPersons.map((person) => {
+              const personId = person.id || "";
+              const permission = permissionsMap.get(personId);
+              const userRole =
+                person.role ||
+                (permission ? permission.getRole() : Role.ALUMNO);
 
-                return (
-                  <tr
-                    key={person.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    <td className="px-3 py-4">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-8 w-8">
-                          {person.picture ? (
-                            <img
-                              className="h-8 w-8 rounded-full"
-                              src={person.picture}
-                              alt={person.name}
-                            />
-                          ) : (
-                            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                              <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">
-                                {person.name.charAt(0)}
-                                {person.surname ? person.surname.charAt(0) : ""}
-                              </span>
-                            </div>
-                          )}
+              return (
+                <tr
+                  key={personId}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <td className="px-3 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {person.picture && (
+                        <div className="flex-shrink-0 h-8 w-8 mr-3">
+                          <img
+                            className="h-8 w-8 rounded-full object-cover"
+                            src={person.picture}
+                            alt={`${person.name}'s profile picture`}
+                          />
                         </div>
-                        <div className="ml-3">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {person.name} {person.surname || ""}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {person.email || ""}
-                          </div>
+                      )}
+                      <div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {person.name} {person.surname}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {person.email}
                         </div>
                       </div>
-                    </td>
-                    <td className="px-3 py-4">
-                      <select
-                        value={role}
-                        onChange={(e) =>
-                          handleRoleChange(
-                            person.id || "",
-                            e.target.value as Role,
-                          )
-                        }
-                        className="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-                        disabled={loading}
-                      >
-                        <option value={Role.ADMIN}>Admin</option>
-                        <option value={Role.PROFESOR}>Teacher</option>
-                        <option value={Role.ALUMNO}>Student</option>
-                      </select>
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <input
-                        type="checkbox"
-                        checked={permission?.dashboard || false}
+                    </div>
+                  </td>
+                  <td className="px-3 py-4 whitespace-nowrap">
+                    <select
+                      value={userRole}
+                      onChange={(e) =>
+                        handleRoleChange(personId, e.target.value)
+                      }
+                      disabled={loading}
+                      className="text-sm rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    >
+                      <option value="Admin">
+                        {getRoleDisplayName("Admin")}
+                      </option>
+                      <option value="Profesor">
+                        {getRoleDisplayName("Profesor")}
+                      </option>
+                      <option value="Alumno">
+                        {getRoleDisplayName("Alumno")}
+                      </option>
+                    </select>
+                  </td>
+                  {/* Resto de las celdas para los permisos */}
+                  {permission && (
+                    <>
+                      <PermissionToggleCell
+                        checked={permission.dashboard}
                         onChange={() =>
-                          handlePermissionToggle(person.id || "", "dashboard")
+                          handlePermissionChange(personId, "dashboard")
                         }
                         disabled={loading}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <input
-                        type="checkbox"
-                        checked={permission?.seeSelfHistory || false}
+                      <PermissionToggleCell
+                        checked={permission.seeSelfHistory}
                         onChange={() =>
-                          handlePermissionToggle(
-                            person.id || "",
-                            "seeSelfHistory",
-                          )
+                          handlePermissionChange(personId, "seeSelfHistory")
                         }
                         disabled={loading}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <input
-                        type="checkbox"
-                        checked={permission?.seeOthersHistory || false}
+                      <PermissionToggleCell
+                        checked={permission.seeOthersHistory}
                         onChange={() =>
-                          handlePermissionToggle(
-                            person.id || "",
-                            "seeOthersHistory",
-                          )
+                          handlePermissionChange(personId, "seeOthersHistory")
                         }
                         disabled={loading}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <input
-                        type="checkbox"
-                        checked={permission?.adminPanel || false}
+                      <PermissionToggleCell
+                        checked={permission.adminPanel}
                         onChange={() =>
-                          handlePermissionToggle(person.id || "", "adminPanel")
+                          handlePermissionChange(personId, "adminPanel")
                         }
                         disabled={loading}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <input
-                        type="checkbox"
-                        checked={permission?.editPermissions || false}
+                      <PermissionToggleCell
+                        checked={permission.editPermissions}
                         onChange={() =>
-                          handlePermissionToggle(
-                            person.id || "",
-                            "editPermissions",
-                          )
+                          handlePermissionChange(personId, "editPermissions")
                         }
                         disabled={loading}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
+                    </>
+                  )}
+                  {!permission && (
+                    <td
+                      colSpan={5}
+                      className="px-3 py-4 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400"
+                    >
+                      No hay permisos asignados
                     </td>
-                  </tr>
-                );
-              })
-            ) : (
+                  )}
+                </tr>
+              );
+            })}
+            {filteredPersons.length === 0 && (
               <tr>
                 <td
                   colSpan={7}
-                  className="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
+                  className="px-3 py-4 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400"
                 >
-                  No users found matching your search.
+                  No se encontraron usuarios
                 </td>
               </tr>
             )}

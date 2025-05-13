@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { changePassword } from "@/lib/api-client";
+import { useSession } from "next-auth/react";
 
 export default function ChangePasswordPage() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,26 @@ export default function ChangePasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { status } = useSession();
+
+  useEffect(() => {
+    // Redirigir al panel si el usuario ya está autenticado
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
+
+  // No renderizar el formulario de cambio de contraseña si el usuario está autenticado o mientras se verifica el estado de autenticación
+  if (status === "authenticated" || status === "loading") {
+    return (
+      <div className="fixed inset-0 flex overflow-hidden flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-light-secondary/30 border-t-light-accent dark:border-dark-secondary/30 dark:border-t-dark-accent shadow-md"></div>
+        <p className="mt-4 text-light-txt-secondary dark:text-dark-txt-secondary">
+          {status === "authenticated" ? "Redirigiendo al panel..." : "Cargando..."}
+        </p>
+      </div>
+    );
+  }
 
   const validateForm = () => {
     if (!email || !oldPassword || !newPassword || !confirmPassword) {
@@ -21,14 +42,14 @@ export default function ChangePasswordPage() {
       return false;
     }
 
-    // Simple email validation
+    // Validación simple de correo electrónico
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError("Por favor, ingrese un correo electrónico válido.");
       return false;
     }
 
-    // Password validation
+    // Validación de contraseña
     if (newPassword.length < 8) {
       setError("La nueva contraseña debe tener al menos 8 caracteres.");
       return false;
@@ -55,7 +76,7 @@ export default function ChangePasswordPage() {
 
       if (result?.status === "ok") {
         setSuccess(true);
-        // Display success message for 3 seconds, then redirect to login
+        // Mostrar mensaje de éxito durante 3 segundos, luego redirigir al inicio de sesión
         setTimeout(() => {
           router.push("/login");
         }, 3000);
@@ -73,7 +94,7 @@ export default function ChangePasswordPage() {
         setError("No se pudo cambiar la contraseña. Inténtelo de nuevo.");
       }
     } catch (error) {
-      console.error("Change password error:", error);
+      console.error("Error al cambiar contraseña:", error);
       setError(
         "Error al cambiar la contraseña. Por favor, inténtelo de nuevo más tarde.",
       );
@@ -83,8 +104,8 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
-      <div className="w-full max-w-md rounded-xl bg-white dark:bg-dark-primary p-8 shadow-lg border border-light-secondary/10 dark:border-dark-secondary/10 transition-all duration-300 animate-fade-in">
+    <div className="fixed inset-0 flex overflow-hidden flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
+      <div className="w-full max-w-md rounded-xl bg-white dark:bg-dark-primary p-8 shadow-lg border border-light-secondary/10 dark:border-dark-secondary/10 transition-all duration-300 animate-fade-in overflow-y-auto max-h-[90vh]">
         <div className="flex justify-center mb-6">
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover flex items-center justify-center text-white shadow-md">
             <svg
@@ -131,27 +152,27 @@ export default function ChangePasswordPage() {
         )}
 
         {success && (
-          <div className="mb-6 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/30 p-4 text-green-700 dark:text-green-400 flex items-center space-x-3 animate-fade-in">
-            <div className="flex-shrink-0">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="w-5 h-5 text-green-500 dark:text-green-400"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              Contraseña cambiada correctamente. Redirigiendo a la página de
-              inicio de sesión...
-            </div>
-          </div>
-        )}
+                <div className="mb-6 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/30 p-4 text-green-700 dark:text-green-400 flex items-center space-x-3 animate-fade-in">
+                  <div className="flex-shrink-0">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-5 h-5 text-green-500 dark:text-green-400"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    Contraseña cambiada correctamente. Redirigiendo a la página de
+                    inicio de sesión...
+                  </div>
+                </div>
+              )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

@@ -1,8 +1,9 @@
 // Permission model for role-based access control
+// Estos valores deben coincidir exactamente con los del backend
 export enum Role {
-  ADMIN = "admin",
-  PROFESOR = "profesor",
-  ALUMNO = "alumno",
+  ADMIN = "Admin",
+  PROFESOR = "Profesor",
+  ALUMNO = "Alumno",
 }
 
 // Type helper for English role names

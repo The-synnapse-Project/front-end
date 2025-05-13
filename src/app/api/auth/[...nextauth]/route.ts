@@ -28,6 +28,7 @@ declare module "next-auth" {
     name?: string | null;
     email?: string | null;
     surname?: string | null;
+    role?: string | null;
   }
 }
 
