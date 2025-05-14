@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Entry } from "@/models/Entry";
 import { Person } from "@/models/Person";
-import { formatDate } from "@/lib/date-utils";
 
 interface AttendanceTrackerProps {
   entries: Entry[];

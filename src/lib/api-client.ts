@@ -1,9 +1,5 @@
 // API client for interacting with the Rocket backend
-import {
-  handleApiRequest,
-  processApiError,
-  createApiError,
-} from "./error-handler";
+import { processApiError, createApiError } from "./error-handler";
 
 // Update this with your Rocket API URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";

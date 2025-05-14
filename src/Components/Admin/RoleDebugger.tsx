@@ -2,7 +2,6 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { Role } from "@/models/Permission";
 import { getRoleDisplayName } from "@/lib/role-utils";
 import { updatePerson } from "@/lib/api-client";
 

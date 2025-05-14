@@ -20,8 +20,6 @@ export default function DatePicker({
   allowClear = false,
   placeholder = "Seleccionar fecha",
 }: DatePickerProps) {
-  const today = formatDate(new Date());
-
   // Generate array of dates for the last week
   const getRecentDates = () => {
     const dates: { value: string; label: string }[] = [];

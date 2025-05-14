@@ -23,7 +23,10 @@ export default function DarkModeToggle({
     <button
       onClick={toggleDarkMode}
       type="button"
-      className="p-2 rounded-full bg-light-secondary/20 text-light-accent hover:bg-light-secondary/30 hover:text-light-accent-hover dark:bg-dark-secondary/30 dark:text-dark-accent dark:hover:bg-dark-secondary/50 dark:hover:text-dark-accent-hover focus:outline-none transition-all duration-300 shadow-sm hover:shadow"
+      className={
+        "p-2 rounded-full bg-light-secondary/20 text-light-accent hover:bg-light-secondary/30 hover:text-light-accent-hover dark:bg-dark-secondary/30 dark:text-dark-accent dark:hover:bg-dark-secondary/50 dark:hover:text-dark-accent-hover focus:outline-none transition-all duration-300 shadow-sm hover:shadow " +
+        className
+      }
       aria-label={darkMode ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
     >
       {darkMode ? (

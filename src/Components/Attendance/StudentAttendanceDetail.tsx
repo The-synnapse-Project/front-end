@@ -3,7 +3,7 @@ import { Person } from "@/models/Person";
 import { Entry } from "@/models/Entry";
 import { getEntriesByPerson } from "@/lib/api-client";
 import DatePicker from "@/Components/Common/DatePicker";
-import { getTodayString, formatDateDisplay } from "@/lib/date-utils";
+import { formatDateDisplay } from "@/lib/date-utils";
 
 interface StudentAttendanceDetailProps {
   student: Person;
@@ -253,16 +253,16 @@ export default function StudentAttendanceDetail({
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-light-background dark:bg-dark-background p-4 rounded">
-              <div className="text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
-                Días Presente
+                <div className="text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
+                  Días Presente
+                </div>
+                <div className="text-2xl font-bold">
+                  {stats.daysPresent}{" "}
+                  <span className="text-sm font-normal">
+                    de {stats.daysInMonth}
+                  </span>
+                </div>
               </div>
-              <div className="text-2xl font-bold">
-                {stats.daysPresent}{" "}
-                <span className="text-sm font-normal">
-                  de {stats.daysInMonth}
-                </span>
-              </div>
-            </div>
 
               <div className="bg-light-background dark:bg-dark-background p-4 rounded">
                 <div className="text-sm text-light-txt-secondary dark:text-dark-txt-secondary">

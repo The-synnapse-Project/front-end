@@ -1,7 +1,4 @@
-import React, { useState, useEffect, use } from "react";
-import { Entry } from "@/models/Entry";
-import { Person } from "@/models/Person";
-import { Permission } from "@/models/Permission";
+import React, { useState, useEffect } from "react";
 import { getAllPersons } from "@/lib/api-client";
 
 interface IntegrationTestCardProps {

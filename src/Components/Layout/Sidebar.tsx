@@ -13,7 +13,7 @@ interface NavItem {
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const { user, permissions, role } = useAuth();
+  const { user, role } = useAuth();
 
   // Definir elementos de navegación basados en roles
   const navItems: NavItem[] = [

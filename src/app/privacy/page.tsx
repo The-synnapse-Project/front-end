@@ -2,7 +2,7 @@
 import { useTheme } from "@/Components/ThemeContext";
 
 export default function Privacy() {
-  const { darkMode } = useTheme();
+  const {} = useTheme();
 
   return (
     <div className="min-h-full grid grid-rows-[auto_1fr_auto] items-start justify-items-center w-full p-8 pb-20 pt-0 gap-8 sm:p-20 sm:pt-0 font-[family-name:var(--font-geist-sans)] overflow-hidden">

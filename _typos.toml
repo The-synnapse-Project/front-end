@@ -1,2 +1,9 @@
-[default]
-extend-ignore-identifiers-re = ["profesor", "momentos"]
+[default.extend-words]
+profesor = "profesor"
+momentos = "momentos"
+historial = "historial"
+presentes = "presentes"
+informe = "informe"
+clientes = "clientes"
+productos = "productos"
+problemas = "problemas"

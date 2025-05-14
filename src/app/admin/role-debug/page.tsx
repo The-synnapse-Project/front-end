@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getPerson, getAllPersons } from "@/lib/api-client";
+import { getAllPersons } from "@/lib/api-client";
 import { Person } from "@/models/Person";
 import { AuthGuard } from "@/lib/auth-guard";
 import { Role } from "@/models/Permission";

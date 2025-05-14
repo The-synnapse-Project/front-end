@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Person } from "@/models/Person";
 import { Permission, Role } from "@/models/Permission";
 import { updatePermission, updatePerson } from "@/lib/api-client";
-import { getRoleDisplayName, getRoleStyleClass } from "@/lib/role-utils";
+import { getRoleDisplayName } from "@/lib/role-utils";
 
 interface PermissionManagementProps {
   persons: Person[];

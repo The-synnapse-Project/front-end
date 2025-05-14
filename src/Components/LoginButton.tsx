@@ -1,4 +1,4 @@
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -7,7 +7,10 @@ interface LoginButtonProps {
   onNavigate?: () => void; // Callback para cuando ocurre la navegación
 }
 
-export default function LoginButton({ isMobile = false, onNavigate }: LoginButtonProps) {
+export default function LoginButton({
+  isMobile = false,
+  onNavigate,
+}: LoginButtonProps) {
   const { data: session } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const router = useRouter();
@@ -239,7 +242,7 @@ export default function LoginButton({ isMobile = false, onNavigate }: LoginButto
           Iniciar sesión
         </button>
         <button
-          onClick={() => handleNavigation('/register')}
+          onClick={() => handleNavigation("/register")}
           className="flex items-center w-full text-left px-3 py-2 text-light-txt-secondary dark:text-dark-txt-secondary hover:bg-light-secondary/10 hover:text-light-accent dark:hover:bg-dark-secondary/20 dark:hover:text-dark-accent rounded-md transition-colors duration-200 mt-2"
         >
           <svg
@@ -277,7 +280,7 @@ export default function LoginButton({ isMobile = false, onNavigate }: LoginButto
         Iniciar sesión
       </button>
       <button
-        onClick={() => handleNavigation('/register')}
+        onClick={() => handleNavigation("/register")}
         className="border border-light-accent text-light-accent hover:bg-light-accent/10 dark:border-dark-accent dark:text-dark-accent dark:hover:bg-dark-accent/10 px-5 py-2 rounded-md text-sm font-medium shadow-sm transition-all duration-300 hover:shadow-md flex items-center gap-1"
       >
         <svg
