@@ -45,7 +45,7 @@ export default function About() {
                   ["Victor Galan", "Desarrollo de Backend y web"],
                 ].map((item) => (
                   <div
-                    key={item}
+                    key={item[0]}
                     className="bg-light-secondary/10 dark:bg-dark-secondary/20 p-4 rounded-lg transition-colors duration-300"
                   >
                     <div className="w-24 h-24 bg-gradient-to-br from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover rounded-full mx-auto mb-4 flex items-center justify-center text-white">
