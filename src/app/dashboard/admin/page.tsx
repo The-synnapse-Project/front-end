@@ -8,7 +8,6 @@ import {
   getEntriesByDate,
   getAllPermissions,
 } from "@/lib/api-client";
-import { useAttendanceUpdates } from "@/hooks/useAttendanceUpdates";
 import DatePicker from "@/Components/Common/DatePicker";
 import AttendanceSummary from "@/Components/Attendance/AttendanceSummary";
 import AttendanceHistory from "@/Components/Attendance/AttendanceHistory";
@@ -20,7 +19,7 @@ import { Permission } from "@/models/Permission";
 import { getTodayString } from "@/lib/date-utils";
 
 function AdminDashboard() {
-  const { user, permissions } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("users");
   const [loading, setLoading] = useState(false);
   const [persons, setPersons] = useState<Person[]>([]);
@@ -60,16 +59,6 @@ function AdminDashboard() {
       };
     }
   };
-
-  // Real-time attendance updates
-  const { lastEntry } = useAttendanceUpdates({
-    onEntry: (entry) => {
-      // Update entries if it's from today
-      if (entry.instant && entry.instant.startsWith(selectedDate)) {
-        setEntries((prevEntries) => [...prevEntries, entry]);
-      }
-    },
-  });
 
   // Load persons and entries
   useEffect(() => {
@@ -243,10 +232,6 @@ function AdminDashboard() {
                     </thead>
                     <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                       {persons.map((person) => {
-                        // Find person's permission
-                        const personPermission = userPermissions.find(
-                          (p) => p.personId === person.id,
-                        );
                         const role = person.role || "";
                         const roleInfo = getRoleInfo(role);
 
