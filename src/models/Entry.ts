@@ -28,12 +28,18 @@ export class Entry {
 
   // Helper to check if the action is an entry
   get isEntry(): boolean {
-    return this.action.toLowerCase() === "entrada";
+    return (
+      this.action.toLowerCase() === "entrada" ||
+      this.action.toLowerCase() === "enter"
+    );
   }
 
   // Helper to check if the action is an exit
   get isExit(): boolean {
-    return this.action.toLowerCase() === "salida";
+    return (
+      this.action.toLowerCase() === "salida" ||
+      this.action.toLowerCase() === "exit"
+    );
   }
 
   // Format the date in a readable format

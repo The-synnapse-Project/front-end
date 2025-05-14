@@ -174,7 +174,7 @@ function TeacherDashboard() {
           {/* Tab Content */}
           {activeTab === "students" && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-semibold mb-4">My Students</h2>
+              <h2 className="text-xl font-semibold mb-4">Mis Estudiantes</h2>
 
               {/* Student search filter */}
               <div className="mb-6">
@@ -183,7 +183,7 @@ function TeacherDashboard() {
                     htmlFor="student-search"
                     className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                   >
-                    Search Students
+                    Buscar Estudiante
                   </label>
                   <input
                     type="text"
@@ -209,7 +209,7 @@ function TeacherDashboard() {
                           scope="col"
                           className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                         >
-                          Name
+                          Nombre
                         </th>
                         <th
                           scope="col"
@@ -221,7 +221,7 @@ function TeacherDashboard() {
                           scope="col"
                           className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                         >
-                          Actions
+                          Acciones
                         </th>
                       </tr>
                     </thead>
@@ -267,7 +267,7 @@ function TeacherDashboard() {
                                 onClick={() => handleViewStudentDetail(person)}
                                 className="text-light-accent dark:text-dark-accent hover:text-light-accent-hover dark:hover:text-dark-accent-hover"
                               >
-                                View Details
+                                Detalles
                               </button>
                             </td>
                           </tr>
@@ -278,7 +278,7 @@ function TeacherDashboard() {
                             colSpan={3}
                             className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
                           >
-                            No students found matching your search.
+                            No se han encontrado estudiantes
                           </td>
                         </tr>
                       )}
@@ -299,7 +299,9 @@ function TeacherDashboard() {
 
           {activeTab === "attendance" && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-semibold mb-4">Attendance Control</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                Control de atencion
+              </h2>
               {/* Date picker */}
               <div className="mb-6">
                 <DatePicker
@@ -318,7 +320,7 @@ function TeacherDashboard() {
                   {/* Attendance tracker */}
                   <div className="bg-light-background dark:bg-dark-background rounded-lg p-4 mb-6">
                     <h3 className="text-lg font-medium mb-4">
-                      Mark Attendance
+                      Marcar entradas
                     </h3>
                     <AttendanceTracker
                       entries={entries}
@@ -330,7 +332,7 @@ function TeacherDashboard() {
                   {/* Attendance history */}
                   <div className="bg-light-background dark:bg-dark-background rounded-lg p-4">
                     <h3 className="text-lg font-medium mb-4">
-                      Today's Attendance History
+                      Historial de asistencia de hoy
                     </h3>
                     <AttendanceHistory
                       entries={entries}
@@ -345,13 +347,15 @@ function TeacherDashboard() {
 
           {activeTab === "reports" && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-semibold mb-4">Attendance Reports</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                Registros de asistenia
+              </h2>
 
               {/* Date range selection */}
               <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Start Date
+                    Fecha de inicio
                   </label>
                   <input
                     type="date"
@@ -362,7 +366,7 @@ function TeacherDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    End Date
+                    Fecha de fin
                   </label>
                   <input
                     type="date"

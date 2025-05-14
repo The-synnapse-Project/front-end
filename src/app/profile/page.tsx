@@ -5,16 +5,17 @@ import { useEffect, useState } from "react";
 import { AuthGuard } from "@/lib/auth-guard";
 import { getPerson, updatePerson } from "@/lib/api-client";
 import { Person } from "@/models/Person";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
-  const [userData, setUserData] = useState<Person | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState<Person | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    surname: "",
-    email: ""
+    name: session?.user.name || "",
+    surname: session?.user.surname || "",
+    email: session?.user.email || "",
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -22,16 +23,16 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function fetchUserData() {
-      if (session?.user?.apiToken) {
+      if (session?.user?.id) {
         try {
-          const apiUser = await getPerson(session.user.apiToken);
+          const apiUser = await getPerson(session.user.id);
           if (apiUser) {
             const personData = Person.fromApiResponse(apiUser);
-            setUserData(personData);
+            setUserInfo(personData);
             setFormData({
               name: personData.name || "",
               surname: personData.surname || "",
-              email: personData.email || ""
+              email: personData.email || "",
             });
           }
         } catch (error) {
@@ -49,9 +50,9 @@ export default function ProfilePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -60,17 +61,19 @@ export default function ProfilePage() {
     setIsSaving(true);
     setSaveError(null);
     setSaveSuccess(false);
-    
+
     try {
-      if (session?.user?.apiToken) {
-        const updatedUser = await updatePerson(session.user.apiToken, {
+      if (session?.user?.id) {
+        await updatePerson(session.user.id, {
           name: formData.name,
           surname: formData.surname,
-          email: formData.email
+          email: formData.email,
         });
-        
+
+        const updatedUser = await getPerson(session.user.id);
+
         if (updatedUser) {
-          setUserData(Person.fromApiResponse(updatedUser));
+          setUserInfo(Person.fromApiResponse(updatedUser));
           setSaveSuccess(true);
           setTimeout(() => {
             setIsEditModalOpen(false);
@@ -129,15 +132,15 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="h-24 w-24 rounded-xl bg-gradient-to-br from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover flex items-center justify-center text-white font-medium text-3xl shadow-md">
-                  {session?.user?.name?.charAt(0) ||
-                    session?.user?.email?.charAt(0) ||
+                  {userInfo?.name?.charAt(0) ||
+                    userInfo?.email?.charAt(0) ||
                     "U"}
                 </div>
               )}
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-light-txt-primary dark:text-dark-txt-primary">
-                  {session?.user?.name ?? "Unknown"}
-                  {session?.user?.surname ?? "Unknown"}
+                  {userInfo?.name ?? "Unknown"}
+                  {userInfo?.surname ?? "Unknown"}
                 </h2>
                 <p className="text-light-txt-secondary dark:text-dark-txt-secondary flex items-center gap-2">
                   <svg
@@ -149,7 +152,7 @@ export default function ProfilePage() {
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                   </svg>
-                  {session?.user?.email}
+                  {userInfo?.email}
                 </p>
                 <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-accent/10 dark:bg-dark-accent/20 text-light-accent dark:text-dark-accent">
                   {session?.user?.image ? "Google Account" : "Email Account"}
@@ -192,7 +195,7 @@ export default function ProfilePage() {
                     Nombre
                   </dt>
                   <dd className="text-light-txt-primary dark:text-dark-txt-primary font-medium text-lg">
-                    {session?.user?.name ?? "Unknown"}
+                    {userInfo?.name ?? "Unknown"}
                   </dd>
                 </div>
 
@@ -209,7 +212,7 @@ export default function ProfilePage() {
                     Apellido
                   </dt>
                   <dd className="text-light-txt-primary dark:text-dark-txt-primary font-medium text-lg">
-                    {session?.user?.surname ?? "Unknown"}
+                    {userInfo?.surname ?? "Unknown"}
                   </dd>
                 </div>
 
@@ -228,9 +231,9 @@ export default function ProfilePage() {
                   </dt>
                   <dd className="text-light-txt-primary dark:text-dark-txt-primary font-medium text-lg flex items-center">
                     <span className="mr-2">
-                      {session?.user?.email ?? "Not provided"}
+                      {userInfo?.email ?? "Not provided"}
                     </span>
-                    {session?.user?.email ? (
+                    {userInfo?.email ? (
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         verificado
                       </span>
@@ -321,8 +324,14 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="mt-8 flex justify-end">
-                <button 
+              <div className="mt-8 flex flex-row justify-end">
+                <Link
+                  href="/change-password"
+                  className="mr-5 px-4 py-2 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-md shadow-sm hover:shadow-md transition-all duration-300"
+                >
+                  Cambiar contraseña
+                </Link>
+                <button
                   onClick={() => setIsEditModalOpen(true)}
                   className="px-4 py-2 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-md shadow-sm hover:shadow-md transition-all duration-300"
                 >
@@ -361,23 +370,23 @@ export default function ProfilePage() {
                   </svg>
                 </button>
               </div>
-              
+
               <form onSubmit={handleSubmit} className="p-6">
                 {saveError && (
                   <div className="mb-6 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
                     <p>{saveError}</p>
                   </div>
                 )}
-                
+
                 {saveSuccess && (
                   <div className="mb-6 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg">
                     <p>¡Perfil actualizado con éxito!</p>
                   </div>
                 )}
-                
+
                 <div className="mb-4">
-                  <label 
-                    htmlFor="name" 
+                  <label
+                    htmlFor="name"
                     className="block text-sm font-medium text-light-txt-secondary dark:text-dark-txt-secondary mb-2"
                   >
                     Nombre
@@ -393,10 +402,10 @@ export default function ProfilePage() {
                     required
                   />
                 </div>
-                
+
                 <div className="mb-4">
-                  <label 
-                    htmlFor="surname" 
+                  <label
+                    htmlFor="surname"
                     className="block text-sm font-medium text-light-txt-secondary dark:text-dark-txt-secondary mb-2"
                   >
                     Apellido
@@ -411,10 +420,10 @@ export default function ProfilePage() {
                     placeholder="Apellido"
                   />
                 </div>
-                
+
                 <div className="mb-6">
-                  <label 
-                    htmlFor="email" 
+                  <label
+                    htmlFor="email"
                     className="block text-sm font-medium text-light-txt-secondary dark:text-dark-txt-secondary mb-2"
                   >
                     Email
@@ -435,7 +444,7 @@ export default function ProfilePage() {
                     </p>
                   )}
                 </div>
-                
+
                 <div className="flex justify-end gap-4">
                   <button
                     type="button"
@@ -452,9 +461,25 @@ export default function ProfilePage() {
                   >
                     {isSaving ? (
                       <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Guardando...
                       </span>

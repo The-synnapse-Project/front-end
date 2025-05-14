@@ -36,7 +36,7 @@ export default function DashboardPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-light-background dark:bg-dark-background transition-colors duration-300">
       <div className="animate-spin rounded-full h-12 w-12 border-4 border-light-secondary/30 border-t-light-accent dark:border-dark-secondary/30 dark:border-t-dark-accent shadow-md"></div>
       <p className="mt-4 text-light-txt-secondary dark:text-dark-txt-secondary">
-        Cargando tu panel...
+        {isAuthenticated ? "Cargando tu panel..." : "Redirigiendo..."}
       </p>
     </div>
   );

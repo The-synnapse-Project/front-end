@@ -27,18 +27,7 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
 
     // If session is loaded and a specific role is required but the user doesn't have it
     if (status === "authenticated" && requiredRole && session?.user?.role) {
-      let hasPermission = false;
-
-      if (Array.isArray(requiredRole)) {
-        // Check if user's role is in the array of required roles - case insensitive
-        hasPermission = requiredRole.some(
-          (role) => role.toLowerCase() === session.user.role?.toLowerCase(),
-        );
-      } else {
-        // Check if user's role matches the required role - case insensitive
-        hasPermission =
-          session.user.role.toLowerCase() === requiredRole.toLowerCase();
-      }
+      let hasPermission = checkUserRole(session?.user?.role, requiredRole);
 
       if (!hasPermission) {
         // Redirect to appropriate dashboard based on actual role
@@ -90,10 +79,22 @@ function checkUserRole(
   if (!userRole || !requiredRole) return false;
 
   if (Array.isArray(requiredRole)) {
-    return requiredRole.includes(userRole);
+    let status = false;
+    for (const role of requiredRole) {
+      if (status) break;
+      status = checkSingleRole(userRole, role);
+    }
+    return status;
   } else {
-    return userRole === requiredRole;
+    return checkSingleRole(userRole, requiredRole);
   }
+}
+
+function checkSingleRole(userRole: Role, requiredRole: Role): boolean {
+  if (userRole === Role.PROFESOR && requiredRole == Role.ALUMNO) return true;
+  if (userRole === Role.ADMIN && requiredRole == Role.ALUMNO) return true;
+  if (userRole === Role.ADMIN && requiredRole == Role.PROFESOR) return true;
+  return userRole === requiredRole;
 }
 
 /**

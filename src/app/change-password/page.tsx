@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { changePassword } from "@/lib/api-client";
+import { changePassword, getPerson } from "@/lib/api-client";
 import { useSession } from "next-auth/react";
 
 export default function ChangePasswordPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("Error");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,22 +15,30 @@ export default function ChangePasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const { status } = useSession();
+  const { status, data: session } = useSession();
 
   useEffect(() => {
-    // Redirigir al panel si el usuario ya está autenticado
-    if (status === "authenticated") {
-      router.replace("/dashboard");
+    async function fetchPerson() {
+      if (!session?.user?.id) return;
+      let person = await getPerson(session?.user?.id);
+      if (person) {
+        setEmail(person.email);
+      }
     }
-  }, [status, router]);
+    fetchPerson();
+    // Redirigir al panel si el usuario ya está autenticado
+    if (status !== "authenticated") {
+      router.replace("/login");
+    }
+  }, [status, router, session]);
 
   // No renderizar el formulario de cambio de contraseña si el usuario está autenticado o mientras se verifica el estado de autenticación
-  if (status === "authenticated" || status === "loading") {
+  if (status !== "authenticated") {
     return (
       <div className="fixed inset-0 flex overflow-hidden flex-col items-center justify-center bg-light-background dark:bg-dark-background transition-colors duration-300">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-light-secondary/30 border-t-light-accent dark:border-dark-secondary/30 dark:border-t-dark-accent shadow-md"></div>
         <p className="mt-4 text-light-txt-secondary dark:text-dark-txt-secondary">
-          {status === "authenticated" ? "Redirigiendo al panel..." : "Cargando..."}
+          {status === "loading" ? "Cargando..." : "Redirigiendo a login..."}
         </p>
       </div>
     );
@@ -152,27 +160,27 @@ export default function ChangePasswordPage() {
         )}
 
         {success && (
-                <div className="mb-6 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/30 p-4 text-green-700 dark:text-green-400 flex items-center space-x-3 animate-fade-in">
-                  <div className="flex-shrink-0">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-5 h-5 text-green-500 dark:text-green-400"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    Contraseña cambiada correctamente. Redirigiendo a la página de
-                    inicio de sesión...
-                  </div>
-                </div>
-              )}
+          <div className="mb-6 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/30 p-4 text-green-700 dark:text-green-400 flex items-center space-x-3 animate-fade-in">
+            <div className="flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-5 h-5 text-green-500 dark:text-green-400"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div>
+              Contraseña cambiada correctamente. Redirigiendo a la página de
+              inicio de sesión...
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -189,6 +197,7 @@ export default function ChangePasswordPage() {
                 type="email"
                 autoComplete="email"
                 required
+                disabled
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none block w-full px-3 py-2 border border-light-secondary/20 dark:border-dark-secondary/20 rounded-md shadow-sm placeholder-light-txt-secondary/50 dark:placeholder-dark-txt-secondary/50 focus:outline-none focus:ring-light-accent dark:focus:ring-dark-accent focus:border-light-accent dark:focus:border-dark-accent sm:text-sm bg-white dark:bg-dark-primary text-light-txt-primary dark:text-dark-txt-primary transition-colors duration-300"
