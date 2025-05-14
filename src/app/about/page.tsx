@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 
 export default function About() {
@@ -15,17 +16,17 @@ export default function About() {
           <div className="px-4 py-5 sm:p-6">
             <div className="prose max-w-none dark:prose-invert">
               <p className="text-light-txt-primary dark:text-dark-txt-primary mb-4">
-                ¡Bienvenido a Synnapse! Estamos dedicados a proporcionar
-                servicios y productos excepcionales a nuestros clientes.
+                ¡Bienvenido a Synnapse! El proyecto del aula inteligente.
               </p>
 
               <h2 className="text-2xl font-semibold text-light-txt-primary dark:text-dark-txt-primary mt-6 mb-4">
                 Nuestra Misión
               </h2>
               <p className="text-light-txt-secondary dark:text-dark-txt-secondary mb-4">
-                Nuestra misión es ofrecer soluciones innovadoras que ayuden a
-                nuestros clientes a alcanzar sus objetivos mientras mantenemos
-                los más altos estándares de calidad y satisfacción del cliente.
+                Nuestro objetivo es lograr la automatización del control de
+                asistencia en las aulas. Gracias a un sistema de camaras y de
+                antenar RFID podemos lograr un control preciso y eficiente de la
+                asistencia en las aulas.
               </p>
 
               <h2 className="text-2xl font-semibold text-light-txt-primary dark:text-dark-txt-primary mt-6 mb-4">
@@ -38,7 +39,11 @@ export default function About() {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                {[1, 2, 3].map((item) => (
+                {[
+                  ["Manuel Romero", "Administrador"],
+                  ["Ivan Villagrasa", "Desarrollo de Integracion y web"],
+                  ["Victor Galan", "Desarrollo de Backend y web"],
+                ].map((item) => (
                   <div
                     key={item}
                     className="bg-light-secondary/10 dark:bg-dark-secondary/20 p-4 rounded-lg transition-colors duration-300"
@@ -58,10 +63,10 @@ export default function About() {
                       </svg>
                     </div>
                     <h3 className="text-lg font-medium text-light-txt-primary dark:text-dark-txt-primary text-center">
-                      Miembro del Equipo {item}
+                      {item[0]}
                     </h3>
                     <p className="text-light-txt-secondary dark:text-dark-txt-secondary text-center">
-                      Cargo
+                      {item[1]}
                     </p>
                   </div>
                 ))}
@@ -77,9 +82,12 @@ export default function About() {
               </p>
 
               <div className="mt-6 flex justify-center md:justify-start">
-                <button className="bg-light-accent hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover text-white py-2 px-4 rounded-md shadow-sm transition-all duration-300 hover:shadow-md">
+                <Link
+                  className="bg-light-accent hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover text-white py-2 px-4 rounded-md shadow-sm transition-all duration-300 hover:shadow-md"
+                  href="mailto:ala-inteligente@cpilosenlaces.com"
+                >
                   Contactar
-                </button>
+                </Link>
               </div>
             </div>
           </div>

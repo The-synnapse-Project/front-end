@@ -74,23 +74,13 @@ export default function Privacy() {
               4. Compartición de Información
             </h2>
             <p className="text-light-txt-secondary dark:text-dark-txt-secondary">
-              Podemos compartir su información personal con:
+              No compartiremos su información personal con terceros, con la
+              única excepción de:
             </p>
             <ul className="list-disc list-inside mt-2 text-light-txt-secondary dark:text-dark-txt-secondary">
               <li>
-                Proveedores de servicios que necesitan acceso a su información
-                para realizar servicios en nuestro nombre
-              </li>
-              <li>
-                Socios con los que ofrecemos servicios conjuntos o promociones
-              </li>
-              <li>
-                Cuando sea requerido por ley o en respuesta a procesos legales
-                válidos
-              </li>
-              <li>
-                En relación con una fusión, venta de activos de la empresa,
-                financiación o adquisición
+                Cuando sea requerido por organismos públicos o en respuesta a
+                procesos legales válidos
               </li>
             </ul>
           </section>
@@ -119,14 +109,11 @@ export default function Privacy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">
-              7. Cookies y Tecnologías Similares
-            </h2>
+            <h2 className="text-xl font-semibold mb-3">7. Sesión de Usuario</h2>
             <p className="text-light-txt-secondary dark:text-dark-txt-secondary">
-              Utilizamos cookies y tecnologías de seguimiento similares para
-              recopilar información sobre sus interacciones con nuestra
-              plataforma. Puede gestionar sus preferencias de cookies a través
-              de la configuración de su navegador.
+              No utilizamos cookies ni tecnologías de seguimiento similares.
+              Únicamente guardamos los datos necesarios para mantener su sesión
+              activa mientras utiliza nuestra plataforma.
             </p>
           </section>
 

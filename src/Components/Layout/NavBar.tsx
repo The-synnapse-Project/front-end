@@ -48,11 +48,16 @@ export default function NavBar() {
   const navItems: NavItem[] = [
     { name: "Inicio", href: "/" },
     {
-      name: "Panel",
+      name: "Perfil",
+      href: "/profile",
+      roles: [Role.ADMIN, Role.PROFESOR, Role.ALUMNO],
+    },
+    {
+      name: "Dashboard",
       href: userRole ? `/dashboard/${userRole.toLowerCase()}` : "/dashboard",
       roles: [Role.ADMIN, Role.PROFESOR, Role.ALUMNO],
     },
-    { name: "Acerca de", href: "/about" },
+    { name: "Sobre nosotros", href: "/about" },
   ];
 
   // Filter nav items based on user role

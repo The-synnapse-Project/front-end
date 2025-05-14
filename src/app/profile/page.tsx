@@ -3,13 +3,22 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/lib/auth-guard";
-import { getPerson } from "@/lib/api-client";
+import { getPerson, updatePerson } from "@/lib/api-client";
 import { Person } from "@/models/Person";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
   const [userData, setUserData] = useState<Person | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    surname: "",
+    email: ""
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -17,7 +26,13 @@ export default function ProfilePage() {
         try {
           const apiUser = await getPerson(session.user.apiToken);
           if (apiUser) {
-            setUserData(Person.fromApiResponse(apiUser));
+            const personData = Person.fromApiResponse(apiUser);
+            setUserData(personData);
+            setFormData({
+              name: personData.name || "",
+              surname: personData.surname || "",
+              email: personData.email || ""
+            });
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -31,6 +46,45 @@ export default function ProfilePage() {
 
     fetchUserData();
   }, [session]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+    
+    try {
+      if (session?.user?.apiToken) {
+        const updatedUser = await updatePerson(session.user.apiToken, {
+          name: formData.name,
+          surname: formData.surname,
+          email: formData.email
+        });
+        
+        if (updatedUser) {
+          setUserData(Person.fromApiResponse(updatedUser));
+          setSaveSuccess(true);
+          setTimeout(() => {
+            setIsEditModalOpen(false);
+            setSaveSuccess(false);
+          }, 1500);
+        }
+      }
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      setSaveError(error.message || "Error al actualizar el perfil");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <AuthGuard>
@@ -268,10 +322,148 @@ export default function ProfilePage() {
               </div>
 
               <div className="mt-8 flex justify-end">
-                <button className="px-4 py-2 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-md shadow-sm hover:shadow-md transition-all duration-300">
+                <button 
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="px-4 py-2 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-md shadow-sm hover:shadow-md transition-all duration-300"
+                >
                   Actualizar Perfil
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Profile Modal Dialog */}
+        {isEditModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-dark-primary rounded-xl shadow-2xl w-full max-w-xl transform transition-all overflow-hidden">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-light-txt-primary dark:text-dark-txt-primary">
+                  Editar Perfil
+                </h2>
+                <button
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+              
+              <form onSubmit={handleSubmit} className="p-6">
+                {saveError && (
+                  <div className="mb-6 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
+                    <p>{saveError}</p>
+                  </div>
+                )}
+                
+                {saveSuccess && (
+                  <div className="mb-6 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg">
+                    <p>¡Perfil actualizado con éxito!</p>
+                  </div>
+                )}
+                
+                <div className="mb-4">
+                  <label 
+                    htmlFor="name" 
+                    className="block text-sm font-medium text-light-txt-secondary dark:text-dark-txt-secondary mb-2"
+                  >
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border border-light-secondary/20 dark:border-dark-secondary/20 bg-white dark:bg-dark-secondary/20 text-light-txt-primary dark:text-dark-txt-primary focus:border-light-accent dark:focus:border-dark-accent focus:ring-2 focus:ring-light-accent/20 dark:focus:ring-dark-accent/20 outline-none transition-all"
+                    placeholder="Nombre"
+                    required
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label 
+                    htmlFor="surname" 
+                    className="block text-sm font-medium text-light-txt-secondary dark:text-dark-txt-secondary mb-2"
+                  >
+                    Apellido
+                  </label>
+                  <input
+                    type="text"
+                    id="surname"
+                    name="surname"
+                    value={formData.surname}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border border-light-secondary/20 dark:border-dark-secondary/20 bg-white dark:bg-dark-secondary/20 text-light-txt-primary dark:text-dark-txt-primary focus:border-light-accent dark:focus:border-dark-accent focus:ring-2 focus:ring-light-accent/20 dark:focus:ring-dark-accent/20 outline-none transition-all"
+                    placeholder="Apellido"
+                  />
+                </div>
+                
+                <div className="mb-6">
+                  <label 
+                    htmlFor="email" 
+                    className="block text-sm font-medium text-light-txt-secondary dark:text-dark-txt-secondary mb-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-lg border border-light-secondary/20 dark:border-dark-secondary/20 bg-white dark:bg-dark-secondary/20 text-light-txt-primary dark:text-dark-txt-primary focus:border-light-accent dark:focus:border-dark-accent focus:ring-2 focus:ring-light-accent/20 dark:focus:ring-dark-accent/20 outline-none transition-all"
+                    placeholder="Email"
+                    readOnly={!!session?.user?.image}
+                  />
+                  {session?.user?.image && (
+                    <p className="mt-1 text-xs text-light-txt-secondary dark:text-dark-txt-secondary">
+                      Email no editable para cuentas de Google
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex justify-end gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="px-4 py-2 bg-gray-200 dark:bg-dark-secondary text-light-txt-primary dark:text-dark-txt-primary hover:bg-gray-300 dark:hover:bg-dark-secondary/80 rounded-md shadow-sm hover:shadow-md transition-all duration-300"
+                    disabled={isSaving}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-md shadow-sm hover:shadow-md transition-all duration-300 disabled:opacity-50"
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Guardando...
+                      </span>
+                    ) : (
+                      "Guardar cambios"
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
