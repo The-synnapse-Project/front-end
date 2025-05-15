@@ -12,4 +12,4 @@ RUN bun run build
 # run the app
 USER bun
 EXPOSE 3000/tcp
-ENTRYPOINT [ "bun", "run", "start" ]
+ENTRYPOINT [ "bun", "run", "start", "-H","0.0.0.0" ]
