@@ -14,6 +14,7 @@ RUN bun install --frozen-lockfile --production
 
 FROM base AS builder
 COPY --from=install /temp/dev/node_modules node_modules
+COPY ./front-end/package.json ./front-end/bun.lock /usr/src/app/
 COPY ./front-end/next.config.ts .
 COPY ./front-end/postcss.config.mjs .
 COPY ./front-end/.env .
