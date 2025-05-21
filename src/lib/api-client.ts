@@ -3,6 +3,7 @@ import { processApiError, createApiError } from "./error-handler";
 
 // Update this with your Rocket API URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { createHmac } from "crypto";
 
 // Authentication interfaces
 export interface LoginCredentials {
@@ -84,6 +85,13 @@ async function fetchWithErrorHandling(
   options?: RequestInit,
 ): Promise<any> {
   try {
+    if (options) {
+      const uri = new URL(url).pathname;
+      options.headers = {
+        ...options.headers,
+        "X-Syn-Api-Key": calc_api_key(uri),
+      };
+    }
     const response = await fetch(url, options);
 
     // Check if the request was successful
@@ -427,7 +435,11 @@ export async function exportAttendanceData(
         "ID,Person ID,Date,Time,Action",
         ...allEntries.map((entry) => {
           const date = new Date(entry.instant);
-          return `${entry.id},${entry.person_id},${date.toLocaleDateString()},${date.toLocaleTimeString()},${entry.action}`;
+          return `${entry.id},${
+            entry.person_id
+          },${date.toLocaleDateString()},${date.toLocaleTimeString()},${
+            entry.action
+          }`;
         }),
       ].join("\n");
 
@@ -522,4 +534,12 @@ export async function calculateAttendanceStats(
     console.error("Error calculating attendance stats:", error);
     throw error;
   }
+}
+
+function calc_api_key(uri: string): string {
+  const api_secret = process.env.API_SECRET ?? "secret";
+  let hmac = createHmac("sha256", api_secret);
+  hmac.update(uri);
+  let hash = hmac.digest("hex");
+  return hash;
 }
