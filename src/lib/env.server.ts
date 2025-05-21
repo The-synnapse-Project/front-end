@@ -1,5 +1,4 @@
-// Server-side environment configuration
-
+"use server";
 /**
  * Environment variables to be used in server components and API routes
  */
@@ -21,6 +20,11 @@ export const serverEnv = {
    * Google OAuth client secret
    */
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+
+  /**
+   * Rocket API Secret
+   */
+  rocketApiSecret: process.env.API_SECRET || "",
 
   /**
    * NextAuth secret for JWT encryption

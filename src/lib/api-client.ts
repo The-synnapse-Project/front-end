@@ -1,82 +1,18 @@
+"use server";
+import {
+  LoginCredentials,
+  LoginResponse,
+  PersonResponse,
+  PermissionResponse,
+  CreatePermissionRequest,
+  EntryResponse,
+} from "@/lib/interfaces";
 // API client for interacting with the Rocket backend
 import { processApiError, createApiError } from "./error-handler";
 
 // Update this with your Rocket API URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-// Authentication interfaces
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  status: string;
-}
-
-// User interfaces
-export interface PersonResponse {
-  id: string;
-  name: string;
-  surname: string;
-  email: string;
-  role: Role;
-  password_hash: string;
-}
-export enum Role {
-  Admin = "Admin",
-  Profesor = "Profesor",
-  Alumno = "Alumno",
-}
-
-// Permission interfaces
-export interface PermissionResponse {
-  id: string;
-  person_id: string;
-  dashboard: boolean;
-  see_self_history: boolean;
-  see_others_history: boolean;
-  admin_panel: boolean;
-  edit_permissions: boolean;
-}
-
-export interface CreatePermissionRequest {
-  id: string;
-  person_id: string;
-  dashboard: boolean;
-  see_self_history: boolean;
-  see_others_history: boolean;
-  admin_panel: boolean;
-  edit_permissions: boolean;
-}
-
-// Entry interfaces
-export interface EntryResponse {
-  id: string;
-  person_id: string;
-  instant: string;
-  action: string;
-}
-
-export interface CreateEntryRequest {
-  id?: string;
-  person_id: string;
-  instant: string;
-  action: string;
-}
-
-// Additional interfaces for API communication
-export interface ApiError {
-  status: string;
-  message: string;
-}
-
-export interface CreatePersonRequest {
-  name: string;
-  surname: string;
-  email: string;
-  password_hash: string;
-}
+import { createHmac } from "crypto";
 
 // Generic fetch wrapper with improved error handling
 async function fetchWithErrorHandling(
@@ -84,7 +20,17 @@ async function fetchWithErrorHandling(
   options?: RequestInit,
 ): Promise<any> {
   try {
-    const response = await fetch(url, options);
+    const uri = new URL(url).pathname;
+    let api_key = await calc_api_key(uri);
+    console.log("API Key:", api_key);
+    let new_options = {
+      ...options,
+      headers: {
+        ...options?.headers,
+        "X-Syn-Api-Key": api_key,
+      },
+    };
+    const response = await fetch(url, new_options);
 
     // Check if the request was successful
     if (!response.ok) {
@@ -260,7 +206,7 @@ export async function deletePermission(id: string): Promise<void> {
  * Generate a password hash for users created from Google authentication
  * In a real system, this should be done on the server side
  */
-export function generateSecureToken(): string {
+export async function generateSecureToken(): Promise<string> {
   const length = 32;
   const chars =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
@@ -427,7 +373,11 @@ export async function exportAttendanceData(
         "ID,Person ID,Date,Time,Action",
         ...allEntries.map((entry) => {
           const date = new Date(entry.instant);
-          return `${entry.id},${entry.person_id},${date.toLocaleDateString()},${date.toLocaleTimeString()},${entry.action}`;
+          return `${entry.id},${
+            entry.person_id
+          },${date.toLocaleDateString()},${date.toLocaleTimeString()},${
+            entry.action
+          }`;
         }),
       ].join("\n");
 
@@ -522,4 +472,12 @@ export async function calculateAttendanceStats(
     console.error("Error calculating attendance stats:", error);
     throw error;
   }
+}
+
+async function calc_api_key(uri: string): Promise<string> {
+  const api_secret = process.env.API_SECRET ?? "secret";
+  let hmac = createHmac("sha256", api_secret);
+  hmac.update(uri);
+  let hash = hmac.digest("hex");
+  return hash;
 }
