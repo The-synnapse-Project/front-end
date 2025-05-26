@@ -24,7 +24,7 @@ export const serverEnv = {
   /**
    * Rocket API Secret
    */
-  rocketApiSecret: process.env.API_SECRET || "",
+  rocketApiSecret: process.env.SYN_API_SECRET || "",
 
   /**
    * NextAuth secret for JWT encryption

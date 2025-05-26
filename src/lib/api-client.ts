@@ -561,7 +561,7 @@ export async function calculateAttendanceStats(
 }
 
 async function calc_api_key(uri: string): Promise<string> {
-  const api_secret = process.env.API_SECRET ?? "secret";
+  const api_secret = process.env.SYN_API_SECRET ?? "secret";
   let hmac = createHmac("sha256", api_secret);
   hmac.update(uri);
   let hash = hmac.digest("hex");
