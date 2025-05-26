@@ -1,5 +1,7 @@
 [default.extend-words]
 profesor = "profesor"
+PROFESOR = "PROFESOR"
+Profesor = "Profesor"
 momentos = "momentos"
 historial = "historial"
 presentes = "presentes"

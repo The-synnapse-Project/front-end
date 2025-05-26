@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import LoginButton from "@/Components/LoginButton";
 import ThemeToggle from "@/Components/ThemeToggle";
@@ -12,11 +12,19 @@ interface NavItem {
   roles?: Role[]; // Optional roles that can see this nav item
 }
 
+interface DashboardItem {
+  name: string;
+  href: string;
+  role: Role;
+}
+
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isDashboardDropdownOpen, setIsDashboardDropdownOpen] = useState(false);
   const { data: session } = useSession();
   const userRole = session?.user?.role;
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleOpenMenu = () => {
     setIsOpen(true);
@@ -44,6 +52,23 @@ export default function NavBar() {
     };
   }, [isOpen]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDashboardDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   // Define los elementos de navegación con restricciones opcionales de roles
   const navItems: NavItem[] = [
     { name: "Inicio", href: "/" },
@@ -52,13 +77,39 @@ export default function NavBar() {
       href: "/profile",
       roles: [Role.ADMIN, Role.PROFESOR, Role.ALUMNO],
     },
-    {
-      name: "Dashboard",
-      href: userRole ? `/dashboard/${userRole.toLowerCase()}` : "/dashboard",
-      roles: [Role.ADMIN, Role.PROFESOR, Role.ALUMNO],
-    },
     { name: "Sobre nosotros", href: "/about" },
   ];
+
+  // Define dashboard options based on role
+  const dashboardItems: DashboardItem[] = [
+    { name: "Dashboard Admin", href: "/dashboard/admin", role: Role.ADMIN },
+    {
+      name: "Dashboard Profesor",
+      href: "/dashboard/profesor",
+      role: Role.PROFESOR,
+    },
+    { name: "Dashboard Alumno", href: "/dashboard/alumno", role: Role.ALUMNO },
+  ];
+
+  // Filter dashboard items based on user role
+  const getAvailableDashboards = (): DashboardItem[] => {
+    if (!userRole) return [];
+
+    switch (userRole as Role) {
+      case Role.ADMIN:
+        return dashboardItems; // Admin can see all dashboards
+      case Role.PROFESOR:
+        return dashboardItems.filter(
+          (item) => item.role === Role.PROFESOR || item.role === Role.ALUMNO,
+        ); // Professor can see profesor and alumno dashboards
+      case Role.ALUMNO:
+        return dashboardItems.filter((item) => item.role === Role.ALUMNO); // Student can only see alumno dashboard
+      default:
+        return [];
+    }
+  };
+
+  const availableDashboards = getAvailableDashboards();
 
   // Filter nav items based on user role
   const filteredNavItems = navItems.filter((item) => {
@@ -93,6 +144,63 @@ export default function NavBar() {
                       {item.name}
                     </Link>
                   ))}
+
+                  {/* Dashboard Dropdown or Single Link */}
+                  {userRole &&
+                    availableDashboards.length > 0 &&
+                    (availableDashboards.length === 1 ? (
+                      // Single dashboard link for ALUMNO
+                      <Link
+                        href={availableDashboards[0].href}
+                        className="text-light-txt-secondary dark:text-dark-txt-secondary hover:text-light-accent hover:bg-light-secondary/10 dark:hover:text-dark-accent dark:hover:bg-dark-secondary/20 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                      >
+                        Dashboard
+                      </Link>
+                    ) : (
+                      // Dropdown for ADMIN and PROFESOR
+                      <div className="relative" ref={dropdownRef}>
+                        <button
+                          onClick={() =>
+                            setIsDashboardDropdownOpen(!isDashboardDropdownOpen)
+                          }
+                          className="text-light-txt-secondary dark:text-dark-txt-secondary hover:text-light-accent hover:bg-light-secondary/10 dark:hover:text-dark-accent dark:hover:bg-dark-secondary/20 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-1"
+                        >
+                          <span>Dashboard</span>
+                          <svg
+                            className={`w-4 h-4 transition-transform duration-200 ${isDashboardDropdownOpen ? "rotate-180" : ""}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </button>
+
+                        {isDashboardDropdownOpen && (
+                          <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-dark-primary rounded-md shadow-lg border border-light-secondary/10 dark:border-dark-secondary/10 z-50">
+                            <div className="py-1">
+                              {availableDashboards.map((dashboard) => (
+                                <Link
+                                  key={dashboard.href}
+                                  href={dashboard.href}
+                                  className="block px-4 py-2 text-sm text-light-txt-secondary dark:text-dark-txt-secondary hover:bg-light-secondary/10 dark:hover:bg-dark-secondary/20 hover:text-light-accent dark:hover:text-dark-accent transition-colors duration-200"
+                                  onClick={() =>
+                                    setIsDashboardDropdownOpen(false)
+                                  }
+                                >
+                                  {dashboard.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>{" "}
@@ -197,6 +305,37 @@ export default function NavBar() {
                   {item.name}
                 </Link>
               ))}
+
+              {/* Mobile Dashboard Links */}
+              {userRole &&
+                availableDashboards.length > 0 &&
+                (availableDashboards.length === 1 ? (
+                  // Single dashboard link for ALUMNO
+                  <Link
+                    href={availableDashboards[0].href}
+                    className="text-light-txt-secondary dark:text-dark-txt-secondary hover:bg-light-secondary/10 hover:text-light-accent dark:hover:bg-dark-secondary/20 dark:hover:text-dark-accent block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                    onClick={handleCloseMenu}
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  // Multiple dashboard links for ADMIN and PROFESOR
+                  <>
+                    <div className="px-3 py-2 text-sm font-semibold text-light-txt-primary dark:text-dark-txt-primary uppercase tracking-wide">
+                      Dashboards
+                    </div>
+                    {availableDashboards.map((dashboard) => (
+                      <Link
+                        key={dashboard.href}
+                        href={dashboard.href}
+                        className="text-light-txt-secondary dark:text-dark-txt-secondary hover:bg-light-secondary/10 hover:text-light-accent dark:hover:bg-dark-secondary/20 dark:hover:text-dark-accent block px-6 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                        onClick={handleCloseMenu}
+                      >
+                        {dashboard.name}
+                      </Link>
+                    ))}
+                  </>
+                ))}
 
               {/* Mobile auth buttons */}
               <div className="mt-4 pt-4 border-t border-light-secondary/20 dark:border-dark-secondary/20">

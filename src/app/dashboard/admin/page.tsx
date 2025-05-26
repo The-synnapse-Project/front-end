@@ -111,11 +111,19 @@ function AdminDashboard() {
   // Handle permissions update
   const handlePermissionsUpdate = async () => {
     try {
-      const permissionsData = await getAllPermissions();
+      // Refresh both permissions and persons since role changes affect both
+      const [permissionsData, personsData] = await Promise.all([
+        getAllPermissions(),
+        getAllPersons(),
+      ]);
+
       const loadedPermissions = permissionsData.map((p) =>
         Permission.fromApiResponse(p),
       );
+      const loadedPersons = personsData.map((p) => Person.fromApiResponse(p));
+
       setUserPermissions(loadedPermissions);
+      setPersons(loadedPersons);
     } catch (error) {
       console.error("Error refreshing permissions:", error);
     }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Person } from "@/models/Person";
 import { Permission, Role } from "@/models/Permission";
 import { updatePermission, updatePerson } from "@/lib/api-client";
@@ -49,16 +49,28 @@ export default function PermissionManagement({
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState<Role | "">("");
 
+  // Local state for optimistic updates
+  const [localPersons, setLocalPersons] = useState<Person[]>(persons);
+
+  // Update local persons when props change
+  useEffect(() => {
+    setLocalPersons(persons);
+  }, [persons]);
+
   // Mapear permisos a sus personas correspondientes para una gestión más fácil
-  const permissionsMap = new Map<string, Permission>();
-  permissions.forEach((permission) => {
-    if (permission.personId) {
-      permissionsMap.set(permission.personId, permission);
-    }
-  });
+  // Use useMemo to ensure the map is properly updated when permissions change
+  const permissionsMap = useMemo(() => {
+    const map = new Map<string, Permission>();
+    permissions.forEach((permission) => {
+      if (permission.personId) {
+        map.set(permission.personId, permission);
+      }
+    });
+    return map;
+  }, [permissions]);
 
   // Filtrar personas en base a la búsqueda y rol
-  const filteredPersons = persons.filter((person) => {
+  const filteredPersons = localPersons.filter((person) => {
     const fullName = `${person.name} ${person.surname || ""}`.toLowerCase();
     const email = person.email?.toLowerCase() || "";
     const userPermission = permissionsMap.get(person.id || "");
@@ -109,10 +121,7 @@ export default function PermissionManagement({
           updatedPermission.toApiRequest(),
         );
 
-        // Actualizar mapa local
-        permissionsMap.set(personId, updatedPermission);
-
-        // Llamar a la función onUpdate si se proporciona
+        // Llamar a la función onUpdate si se proporciona para refrescar datos
         if (onUpdate) onUpdate();
       }
     } catch (error) {
@@ -127,6 +136,13 @@ export default function PermissionManagement({
     try {
       setLoading(true);
 
+      // Optimistic update: Update the local state immediately
+      setLocalPersons((prevPersons) =>
+        prevPersons.map((person) =>
+          person.id === personId ? { ...person, role: newRole } : person,
+        ),
+      );
+
       console.log(`Actualizando rol para usuario ${personId} a: ${newRole}`);
 
       // Actualizar el rol en la API
@@ -136,6 +152,9 @@ export default function PermissionManagement({
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error(`Error al actualizar el rol para ${personId}:`, error);
+
+      // Revert optimistic update on error
+      setLocalPersons(persons);
     } finally {
       setLoading(false);
     }
