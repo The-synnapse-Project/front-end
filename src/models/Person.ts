@@ -6,6 +6,7 @@ export class Person {
   picture?: string;
   email?: string;
   role?: string;
+  googleId?: string;
   password_hash?: string; // Only used internally, never exposed to client
 
   constructor(
@@ -17,6 +18,7 @@ export class Person {
       dateOfBirth?: Date;
       picture?: string;
       role?: string;
+      googleId?: string;
     },
   ) {
     this.name = name;
@@ -28,6 +30,7 @@ export class Person {
       this.dateOfBirth = options.dateOfBirth;
       this.picture = options.picture;
       this.role = options.role;
+      this.googleId = options.googleId;
     }
   }
 
@@ -39,12 +42,14 @@ export class Person {
     email: string;
     role?: string;
     password_hash?: string;
+    google_id?: string;
   }): Person {
     const person = new Person(data.name, {
       id: data.id,
       surname: data.surname,
       email: data.email,
       role: data.role, // El rol viene del backend como "Admin", "Profesor", "Alumno"
+      googleId: data.google_id, // Add googleId property
     });
 
     // Store password_hash only if needed for internal operations

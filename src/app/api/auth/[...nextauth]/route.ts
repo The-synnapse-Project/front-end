@@ -13,6 +13,7 @@ declare module "next-auth" {
       surname?: string | null;
       apiToken?: string | null;
       role?: Role | null;
+      googleId?: string | null;
       permissions?: {
         dashboard: boolean;
         seeSelfHistory: boolean;

@@ -252,6 +252,15 @@ export default function LoginPage() {
                 Registrarse
               </Link>
             </p>
+            <p className="text-light-txt-secondary dark:text-dark-txt-secondary text-sm mt-5 w-full text-center">
+              ¿Has olvidado tu contraseña?
+              <Link
+                href="/reset-password"
+                className="ml-2 text-light-accent dark:text-dark-accent hover:text-light-accent-hover dark:hover:text-dark-accent-hover font-medium"
+              >
+                Restablecer contraseña
+              </Link>
+            </p>
             <p className="text-center mt-6 text-sm text-light-txt-secondary dark:text-dark-txt-secondary">
               Al iniciar sesión, aceptas nuestros
               <a

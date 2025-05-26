@@ -77,10 +77,6 @@ export default function PermissionManagement({
       // Comparación insensible a mayúsculas/minúsculas
       userRole?.toLowerCase() === filterRole?.toLowerCase();
 
-    console.log(
-      `Usuario ${person.name}, rol=${userRole}, buscando=${filterRole}, coincide=${matchesRole}`,
-    );
-
     return matchesSearch && matchesRole;
   });
 

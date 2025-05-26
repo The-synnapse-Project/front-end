@@ -5,11 +5,14 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import {
   loginWithCredentials,
-  createPerson,
   getAllPersons,
   getPermissionByPerson,
   createPermission,
   getPerson,
+  register,
+  loginWithGoogle,
+  registerWithGoogle,
+  updateGoogleId,
 } from "@/lib/api-client";
 import { Permission, Role } from "@/models/Permission";
 
@@ -73,60 +76,152 @@ export const authOptions: NextAuthOptions = {
       // If this is a sign-in from Google, we need to create/sync the user with our API
       if (account?.provider === "google" && user?.email) {
         try {
-          // Check if the user exists in our API
-          const existingUser = await getAllPersons().then((users) =>
-            users.find((u) => u.email === user.email),
+          // First, try to login with Google ID
+          let googleLoginResponse = await loginWithGoogle(
+            account.providerAccountId,
+            user.email,
           );
+          console.log("Google login response:", googleLoginResponse);
+          if (!googleLoginResponse || googleLoginResponse.status !== "ok") {
+            console.log(
+              "No Google login response, registering user with Google ID",
+            );
+            const registerResponse = await registerWithGoogle(
+              account.providerAccountId,
+              user.email,
+              user.name || "User",
+              user.surname || "",
+            );
 
-          if (existingUser) {
-            // User exists, use their API ID
-            token.apiId = existingUser.id;
-            token.surname = existingUser.surname;
-            token.role = existingUser.role; // Also store the user's role
-          } else {
-            // User doesn't exist, create them
-            const nameParts = user.name?.split(" ") || ["User", ""];
-            const firstName = nameParts[0];
-            const lastName =
-              nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
-
-            const newUser = await createPerson({
-              name: firstName,
-              surname: lastName,
-              email: user.email,
-              password: crypto.randomUUID(), // Random password since Google users authenticate differently
-            });
-
-            if (newUser) {
-              token.apiId = newUser.id;
-              token.surname = newUser.surname;
-
-              // Create default permissions for new user (Alumno by default)
-              if (newUser.id) {
-                const defaultPermission = Permission.fromRole(
-                  crypto.randomUUID(),
-                  newUser.id,
-                  Role.ALUMNO,
-                );
-
-                await createPermission({
-                  id: defaultPermission.id,
-                  person_id: defaultPermission.personId,
-                  dashboard: defaultPermission.dashboard,
-                  see_self_history: defaultPermission.seeSelfHistory,
-                  see_others_history: defaultPermission.seeOthersHistory,
-                  admin_panel: defaultPermission.adminPanel,
-                  edit_permissions: defaultPermission.editPermissions,
-                });
-
-                // Set default role for new users
-                token.role = Role.ALUMNO;
-              }
+            // If registration was successful and returned user data, use it
+            if (registerResponse?.status === "ok" && registerResponse.user) {
+              console.log(
+                "User registered successfully:",
+                registerResponse.user,
+              );
+              token.id = registerResponse.user.id;
+              token.apiId = registerResponse.user.id;
+              token.surname = registerResponse.user.surname || "";
+              token.role = registerResponse.user.role;
+              token.googleId = account.providerAccountId;
+            } else {
+              // Fallback: try to login again after registration
+              googleLoginResponse = await loginWithGoogle(
+                account.providerAccountId,
+                user.email,
+              );
             }
           }
 
-          // Get user permissions
-          if (token.apiId) {
+          if (
+            googleLoginResponse &&
+            googleLoginResponse.status === "ok" &&
+            googleLoginResponse.user
+          ) {
+            console.log(
+              "User authenticated via Google ID:",
+              googleLoginResponse.user,
+            );
+            // User exists and was authenticated via Google ID
+            // Set the database ID as both id and apiId to be used for all API interactions
+            token.id = googleLoginResponse.user.id;
+            token.apiId = googleLoginResponse.user.id;
+            token.surname = googleLoginResponse.user.surname || "";
+            token.role = googleLoginResponse.user.role;
+            // Store Google ID separately, not as the main user ID
+            token.googleId = account.providerAccountId;
+          } else {
+            console.log(
+              "No user found with Google ID, checking for email match",
+            );
+            // First, get all users and check for matching email
+            const allUsers = await getAllPersons();
+            const existingUser = allUsers.find((u) => u.email === user.email);
+
+            if (existingUser) {
+              // User exists with matching email but no Google ID, update their record
+              token.id = existingUser.id;
+              token.apiId = existingUser.id;
+              token.surname = existingUser.surname;
+              token.role = existingUser.role;
+              token.googleId = account.providerAccountId;
+
+              // Update the user's Google ID in the database if they don't have one
+              if (!existingUser.google_id) {
+                console.log(
+                  "Updating existing user's Google ID:",
+                  existingUser.id,
+                );
+                try {
+                  const updateResult = await updateGoogleId(
+                    existingUser.id,
+                    account.providerAccountId,
+                  );
+                  if (updateResult?.status === "ok") {
+                    console.log(
+                      "Successfully updated Google ID for existing user",
+                    );
+                  } else {
+                    console.error(
+                      "Failed to update Google ID:",
+                      updateResult?.message,
+                    );
+                  }
+                } catch (error) {
+                  console.error("Error updating Google ID:", error);
+                }
+              }
+            } else {
+              // User doesn't exist, create a new one
+              const nameParts = user.name?.split(" ") || ["User", ""];
+              const firstName = nameParts[0];
+              const lastName =
+                nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
+              await register(
+                firstName,
+                lastName,
+                user.email,
+                null, // Google users don't have a password initially
+                account.providerAccountId, // Pass the Google ID
+              );
+              const newUser = await getAllPersons().then((users) =>
+                users.find((u) => u.email === user.email),
+              );
+
+              if (newUser) {
+                token.id = newUser.id;
+                token.apiId = newUser.id;
+                token.surname = newUser.surname;
+                token.googleId = account.providerAccountId; // Store actual Google ID
+
+                // Create default permissions for new user (Alumno by default)
+                if (newUser.id) {
+                  const defaultPermission = Permission.fromRole(
+                    crypto.randomUUID(),
+                    newUser.id,
+                    Role.ALUMNO,
+                  );
+
+                  await createPermission({
+                    id: defaultPermission.id,
+                    person_id: defaultPermission.personId,
+                    dashboard: defaultPermission.dashboard,
+                    see_self_history: defaultPermission.seeSelfHistory,
+                    see_others_history: defaultPermission.seeOthersHistory,
+                    admin_panel: defaultPermission.adminPanel,
+                    edit_permissions: defaultPermission.editPermissions,
+                  });
+
+                  // Set default role for new users
+                  token.role = Role.ALUMNO;
+                } else {
+                  console.error("Error creating new user:", user.email);
+                }
+              }
+            }
+
+            // Get user permissions
             const userPermissions = await getPermissionByPerson(
               token.apiId as string,
             );
@@ -142,13 +237,39 @@ export const authOptions: NextAuthOptions = {
               token.role = (await getPerson(token.apiId as string))?.role;
             }
           }
+
+          // Fetch permissions for any Google user (whether found via login or created)
+          if (token.apiId) {
+            try {
+              const userPermissions = await getPermissionByPerson(
+                token.apiId as string,
+              );
+              if (userPermissions) {
+                const permissions = Permission.fromApiResponse(userPermissions);
+                token.permissions = {
+                  dashboard: permissions.dashboard,
+                  seeSelfHistory: permissions.seeSelfHistory,
+                  seeOthersHistory: permissions.seeOthersHistory,
+                  adminPanel: permissions.adminPanel,
+                  editPermissions: permissions.editPermissions,
+                };
+                token.role = (await getPerson(token.apiId as string))?.role;
+              }
+            } catch (error) {
+              console.error("Error fetching Google user permissions:", error);
+            }
+          }
         } catch (error) {
           console.error("Error syncing Google user with API:", error);
         }
       }
 
+      console.log("JWT callback token:", token);
+      console.log("JWT callback user:", user);
       // Pass data from user object to token on sign-in
-      if (user) {
+      if (user && account?.provider !== "google") {
+        // Only process credentials sign-in here, not Google sign-in
+        // Google sign-in is handled above
         token.id = user.id;
         token.surname = user.surname;
 
@@ -177,8 +298,12 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
+      console.log("Session callback token:", token);
+      console.log("Session callback session:", session);
       if (token && session.user) {
-        session.user.id = (token.sub as string) || (token.id as string);
+        // Use apiId as the primary identifier for all interactions with our API
+        // DON'T use Google ID (token.sub) as the user's ID
+        session.user.id = (token.apiId as string) || (token.id as string);
         session.user.surname = token.surname as string;
         // Use the API ID for interacting with our Rocket API
         session.user.apiToken = token.apiId as string;
@@ -195,6 +320,11 @@ export const authOptions: NextAuthOptions = {
         // Add role to session
         if (token.role) {
           session.user.role = token.role as Role;
+        }
+
+        // Add googleId to session if it exists
+        if (token.googleId) {
+          session.user.googleId = token.googleId as string;
         }
       }
       return session;
@@ -214,13 +344,29 @@ export async function getCurrentUser(): Promise<Person | null> {
       return null;
     }
 
-    // Try to get user data from the API
-    const apiUser = await getAllPersons().then((users) =>
-      users.find((user) => user.email === session.user.email),
-    );
+    // If we have an apiToken (which should be our internal DB ID), use it directly
+    if (session.user.apiToken) {
+      try {
+        const user = await getPerson(session.user.apiToken);
+        if (user) {
+          return Person.fromApiResponse(user);
+        }
+      } catch (error) {
+        console.error("Error getting user by API token:", error);
+      }
+    }
 
-    if (apiUser) {
-      return Person.fromApiResponse(apiUser);
+    // Fallback to finding by email
+    try {
+      const apiUser = await getAllPersons().then((users) =>
+        users.find((user) => user.email === session.user.email),
+      );
+
+      if (apiUser) {
+        return Person.fromApiResponse(apiUser);
+      }
+    } catch (error) {
+      console.error("Error finding user by email:", error);
     }
 
     // Fallback to session data if API data is not available

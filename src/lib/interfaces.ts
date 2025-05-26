@@ -15,7 +15,8 @@ export interface PersonResponse {
   surname: string;
   email: string;
   role: Role;
-  password_hash: string;
+  password_hash?: string;
+  google_id?: string;
 }
 export enum Role {
   Admin = "Admin",

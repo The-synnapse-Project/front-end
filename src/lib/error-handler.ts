@@ -57,10 +57,6 @@ export function createApiError(
 
 // Process an error from fetch or other source into an ApiError
 export function processApiError(error: any): ApiError {
-  if (!navigator.onLine) {
-    return createApiError(0, "No internet connection", { original: error });
-  }
-
   // Error from fetch API
   if (error.status) {
     return createApiError(

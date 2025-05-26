@@ -15,14 +15,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 import { createHmac } from "crypto";
 
 // Generic fetch wrapper with improved error handling
-async function fetchWithErrorHandling(
+export async function fetchWithErrorHandling(
   url: string,
   options?: RequestInit,
 ): Promise<any> {
   try {
     const uri = new URL(url).pathname;
     let api_key = await calc_api_key(uri);
-    console.log("API Key:", api_key);
     let new_options = {
       ...options,
       headers: {
@@ -203,30 +202,14 @@ export async function deletePermission(id: string): Promise<void> {
 }
 
 /**
- * Generate a password hash for users created from Google authentication
- * In a real system, this should be done on the server side
- */
-export async function generateSecureToken(): Promise<string> {
-  const length = 32;
-  const chars =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
-  let result = "";
-
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-
-  return result;
-}
-
-/**
  * Register a new user
  */
 export async function register(
   name: string,
   surname: string,
   email: string,
-  password: string,
+  password: string | null,
+  google_id?: string | null,
 ): Promise<{ status: string; message?: string } | null> {
   try {
     return await fetchWithErrorHandling(`${API_BASE_URL}/api/auth/register`, {
@@ -239,10 +222,66 @@ export async function register(
         surname,
         email,
         password,
+        google_id,
       }),
     });
   } catch (error) {
     console.error("Registration error:", error);
+    return null;
+  }
+}
+
+/**
+ * Login with Google
+ */
+export async function loginWithGoogle(
+  googleId: string,
+  email: string,
+): Promise<{ status: string; message?: string; user?: any } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/google-login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          google_id: googleId,
+          email,
+        }),
+      },
+    );
+  } catch (error) {
+    console.error("Google login error:", error);
+    return null;
+  }
+}
+
+export async function registerWithGoogle(
+  google_id: string,
+  email: string,
+  name: string,
+  surname: string,
+): Promise<{ status: string; message?: string; user?: any } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/register-google`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          google_id,
+          email,
+          name,
+          surname,
+        }),
+      },
+    );
+  } catch (error) {
+    console.error("Register with Google error:", error);
     return null;
   }
 }
@@ -272,6 +311,53 @@ export async function changePassword(
     );
   } catch (error) {
     console.error("Change password error:", error);
+    return null;
+  }
+}
+
+/**
+ * Request a password reset email
+ */
+export async function forgotPassword(
+  email: string,
+): Promise<{ status: string; message?: string } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/forgot-password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      },
+    );
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    return null;
+  }
+}
+
+/**
+ * Reset password with token
+ */
+export async function resetPasswordWithToken(
+  token: string,
+  newPassword: string,
+): Promise<{ status: string; message?: string } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/reset-password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, new_password: newPassword }),
+      },
+    );
+  } catch (error) {
+    console.error("Reset password error:", error);
     return null;
   }
 }
@@ -480,4 +566,103 @@ async function calc_api_key(uri: string): Promise<string> {
   hmac.update(uri);
   let hash = hmac.digest("hex");
   return hash;
+}
+
+/**
+ * Set a password for a user (particularly for Google users who don't have one)
+ */
+export async function setPassword(
+  email: string,
+  newPassword: string,
+): Promise<{ status: string; message?: string } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/set-password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          new_password: newPassword,
+        }),
+      },
+    );
+  } catch (error) {
+    console.error("Set password error:", error);
+    return null;
+  }
+}
+
+/**
+ * Link a Google account to an existing user account
+ */
+export async function linkGoogleAccount(
+  email: string,
+  googleEmail: string,
+  password: string,
+): Promise<{ status: string; message?: string } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/link-google`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          google_email: googleEmail,
+          password,
+        }),
+      },
+    );
+  } catch (error) {
+    console.error("Link Google account error:", error);
+    return null;
+  }
+}
+
+/**
+ * Get a person by Google ID from the API
+ */
+export async function getPersonByGoogleId(
+  googleId: string,
+): Promise<PersonResponse | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/person/by-google-id/${googleId}`,
+    );
+  } catch (error) {
+    console.error("Error getting person by Google ID:", error);
+    return null;
+  }
+}
+
+/**
+ * Update a user's Google ID
+ */
+export async function updateGoogleId(
+  personId: string,
+  googleId: string,
+): Promise<{ status: string; message?: string } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/update-google-id`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          person_id: personId,
+          google_id: googleId,
+        }),
+      },
+    );
+  } catch (error) {
+    console.error("Error updating Google ID:", error);
+    return null;
+  }
 }
