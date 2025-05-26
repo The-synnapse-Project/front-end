@@ -81,11 +81,8 @@ export const authOptions: NextAuthOptions = {
             account.providerAccountId,
             user.email,
           );
-          console.log("Google login response:", googleLoginResponse);
+
           if (!googleLoginResponse || googleLoginResponse.status !== "ok") {
-            console.log(
-              "No Google login response, registering user with Google ID",
-            );
             const registerResponse = await registerWithGoogle(
               account.providerAccountId,
               user.email,
@@ -95,10 +92,6 @@ export const authOptions: NextAuthOptions = {
 
             // If registration was successful and returned user data, use it
             if (registerResponse?.status === "ok" && registerResponse.user) {
-              console.log(
-                "User registered successfully:",
-                registerResponse.user,
-              );
               token.id = registerResponse.user.id;
               token.apiId = registerResponse.user.id;
               token.surname = registerResponse.user.surname || "";
@@ -118,10 +111,6 @@ export const authOptions: NextAuthOptions = {
             googleLoginResponse.status === "ok" &&
             googleLoginResponse.user
           ) {
-            console.log(
-              "User authenticated via Google ID:",
-              googleLoginResponse.user,
-            );
             // User exists and was authenticated via Google ID
             // Set the database ID as both id and apiId to be used for all API interactions
             token.id = googleLoginResponse.user.id;
@@ -131,9 +120,6 @@ export const authOptions: NextAuthOptions = {
             // Store Google ID separately, not as the main user ID
             token.googleId = account.providerAccountId;
           } else {
-            console.log(
-              "No user found with Google ID, checking for email match",
-            );
             // First, get all users and check for matching email
             const allUsers = await getAllPersons();
             const existingUser = allUsers.find((u) => u.email === user.email);
@@ -148,25 +134,11 @@ export const authOptions: NextAuthOptions = {
 
               // Update the user's Google ID in the database if they don't have one
               if (!existingUser.google_id) {
-                console.log(
-                  "Updating existing user's Google ID:",
-                  existingUser.id,
-                );
                 try {
                   const updateResult = await updateGoogleId(
                     existingUser.id,
                     account.providerAccountId,
                   );
-                  if (updateResult?.status === "ok") {
-                    console.log(
-                      "Successfully updated Google ID for existing user",
-                    );
-                  } else {
-                    console.error(
-                      "Failed to update Google ID:",
-                      updateResult?.message,
-                    );
-                  }
                 } catch (error) {
                   console.error("Error updating Google ID:", error);
                 }
@@ -264,8 +236,6 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      console.log("JWT callback token:", token);
-      console.log("JWT callback user:", user);
       // Pass data from user object to token on sign-in
       if (user && account?.provider !== "google") {
         // Only process credentials sign-in here, not Google sign-in
@@ -298,8 +268,6 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
-      console.log("Session callback token:", token);
-      console.log("Session callback session:", session);
       if (token && session.user) {
         // Use apiId as the primary identifier for all interactions with our API
         // DON'T use Google ID (token.sub) as the user's ID

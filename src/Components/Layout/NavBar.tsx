@@ -16,7 +16,6 @@ export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const { data: session } = useSession();
-  console.log("Session data:", session);
   const userRole = session?.user?.role;
 
   const handleOpenMenu = () => {

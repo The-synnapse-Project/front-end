@@ -1,15 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  fetchWithErrorHandling,
-  forgotPassword,
-  resetPasswordWithToken,
-} from "@/lib/api-client";
+import { forgotPassword, resetPasswordWithToken } from "@/lib/api-client";
 
-export default function ResetPasswordPage() {
+function ResetPasswordPage() {
   const [email, setEmail] = useState("");
   const [token, setToken] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
@@ -369,5 +365,24 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPageWrapper() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center py-12">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-light-secondary/30 border-t-light-accent dark:border-dark-secondary/30 dark:border-t-dark-accent shadow-md mb-4"></div>
+            <p className="text-light-txt-secondary dark:text-dark-txt-secondary">
+              Cargando página de restablecimiento de contraseña...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <ResetPasswordPage />
+    </Suspense>
   );
 }
