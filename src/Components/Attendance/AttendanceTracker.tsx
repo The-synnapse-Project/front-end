@@ -5,6 +5,7 @@ import { Person } from "@/models/Person";
 interface AttendanceTrackerProps {
   entries: Entry[];
   persons: Person[];
+  onStudentClick: (person: Person) => void;
   onMarkAttendance?: (personId: string, action: string) => Promise<void>;
   isReadOnly?: boolean;
 }
@@ -13,6 +14,7 @@ export default function AttendanceTracker({
   entries,
   persons,
   onMarkAttendance,
+  onStudentClick,
   isReadOnly = false,
 }: AttendanceTrackerProps) {
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
@@ -82,6 +84,7 @@ export default function AttendanceTracker({
               <tr
                 key={person.id}
                 className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                onClick={() => onStudentClick(person)}
               >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">

@@ -84,7 +84,7 @@ export default function AttendanceHistory({
             <option value="">Todas las fechas</option>
             {uniqueDates.map((date) => (
               <option key={date} value={date}>
-                {new Date(date).toLocaleDateString()}
+                {formatDateDisplay(new Date(date))}
               </option>
             ))}
           </select>

@@ -44,7 +44,11 @@ export class Entry {
 
   // Format the date in a readable format
   get formattedDate(): string {
-    return new Date(this.instant).toLocaleDateString();
+    const date = new Date(this.instant);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 
   // Format the time in a readable format

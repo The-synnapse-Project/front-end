@@ -459,9 +459,12 @@ export async function exportAttendanceData(
         "ID,Person ID,Date,Time,Action",
         ...allEntries.map((entry) => {
           const date = new Date(entry.instant);
+          const day = String(date.getDate()).padStart(2, "0");
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const year = date.getFullYear();
           return `${entry.id},${
             entry.person_id
-          },${date.toLocaleDateString()},${date.toLocaleTimeString()},${
+          },${day}/${month}/${year},${date.toLocaleTimeString()},${
             entry.action
           }`;
         }),

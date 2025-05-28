@@ -3,7 +3,12 @@
 import { useAuth, withRoleAccess } from "@/lib/auth-guard";
 import { Role } from "@/models/Permission";
 import { useState, useEffect } from "react";
-import { getAllPersons, createEntry, getEntriesByDate } from "@/lib/api-client";
+import {
+  getAllPersons,
+  createEntry,
+  getEntriesByDate,
+  getAllEntries,
+} from "@/lib/api-client";
 import { handleApiRequest } from "@/lib/error-handler";
 import DatePicker from "@/Components/Common/DatePicker";
 import AttendanceTracker from "@/Components/Attendance/AttendanceTracker";
@@ -21,10 +26,15 @@ function TeacherDashboard() {
   const [persons, setPersons] = useState<Person[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [selectedDate, setSelectedDate] = useState(getTodayString());
-  const [reportStartDate, setReportStartDate] = useState(getTodayString());
+  const [reportStartDate, setReportStartDate] = useState(() => {
+    const today = new Date();
+    today.setDate(today.getDate() - 1);
+    return today.toISOString().split("T")[0];
+  });
   const [reportEndDate, setReportEndDate] = useState(getTodayString());
   const [selectedStudent, setSelectedStudent] = useState<Person | null>(null);
   const [studentFilter, setStudentFilter] = useState("");
+  const [prevTab, setPrevTab] = useState("students");
 
   // Load persons and entries
   useEffect(() => {
@@ -39,7 +49,7 @@ function TeacherDashboard() {
         setPersons(loadedPersons ? loadedPersons : []);
 
         // Load entries for the selected date
-        await loadEntries(selectedDate);
+        await loadEntries();
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
@@ -52,19 +62,19 @@ function TeacherDashboard() {
 
   // Load entries when date changes
   useEffect(() => {
-    loadEntries(selectedDate);
-  }, [selectedDate]);
+    loadEntries();
+  }, []);
 
-  async function loadEntries(date: string) {
+  async function loadEntries() {
     try {
-      const entriesData = await handleApiRequest(() => getEntriesByDate(date));
+      const entriesData = await getAllEntries();
 
       if (entriesData) {
         const loadedEntries = entriesData.map((e) => Entry.fromApiResponse(e));
         setEntries(loadedEntries);
       }
     } catch (error) {
-      console.error(`Error loading entries for date ${date}:`, error);
+      console.error(`Error loading entries:`, error);
     }
   }
 
@@ -80,7 +90,7 @@ function TeacherDashboard() {
 
       if (entry) {
         // Reload entries to show the updated data
-        await loadEntries(selectedDate);
+        await loadEntries();
       }
     } catch (error) {
       console.error("Error marking attendance:", error);
@@ -107,12 +117,13 @@ function TeacherDashboard() {
 
   const handleViewStudentDetail = (student: Person) => {
     setSelectedStudent(student);
+    setPrevTab(activeTab);
     setActiveTab("studentDetail");
   };
 
   const handleBackToStudentList = () => {
     setSelectedStudent(null);
-    setActiveTab("students");
+    setActiveTab(prevTab);
   };
 
   return (
@@ -230,7 +241,8 @@ function TeacherDashboard() {
                         filteredPersons.map((person) => (
                           <tr
                             key={person.id}
-                            className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                            className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                            onClick={() => handleViewStudentDetail(person)}
                           >
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
@@ -326,6 +338,7 @@ function TeacherDashboard() {
                       entries={entries}
                       persons={persons}
                       onMarkAttendance={handleMarkAttendance}
+                      onStudentClick={handleViewStudentDetail}
                     />
                   </div>
 

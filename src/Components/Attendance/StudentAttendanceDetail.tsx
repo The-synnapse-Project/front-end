@@ -238,7 +238,11 @@ export default function StudentAttendanceDetail({
                   {studentStatus.lastEntryTime.toLocaleTimeString()}
                   {studentStatus.entry && (
                     <span className="ml-2 font-medium">
-                      ({studentStatus.entry.action})
+                      (
+                      {studentStatus.entry.action == "Enter"
+                        ? "Entrada"
+                        : "Salida"}
+                      )
                     </span>
                   )}
                 </span>

@@ -15,14 +15,14 @@ function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
+    const searchParams = useSearchParams();
     const tokenParam = searchParams.get("token");
     if (tokenParam) {
       setToken(tokenParam);
     }
-  }, [searchParams]);
+  }, []);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
