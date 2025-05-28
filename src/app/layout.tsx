@@ -34,7 +34,7 @@ export default function RootLayout({
       >
         <Providers>
           <NavBar />
-          <main className="flex-grow w-full max-w-full">{children}</main>
+          <main className="flex-grow w-full max-w-full pt-16">{children}</main>
         </Providers>
       </body>
     </html>

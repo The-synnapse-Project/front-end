@@ -21,10 +21,10 @@
   --color-dark-accent-hover: #93c5fd;
   --color-dark-background: #0f172a; /* Very dark blue-gray */
 
-  --color-light-txt-primary: #1e293b;
-  --color-light-txt-secondary: #64748b;
-  --color-dark-txt-primary: #f1f5f9;
-  --color-dark-txt-secondary: #94a3b8;
+  --color-light-txt-primary: #0f172a;
+  --color-light-txt-secondary: #475569;
+  --color-dark-txt-primary: #ffffff;
+  --color-dark-txt-secondary: #cbd5e1;
 
   /* Additional colors for highlights, success, warnings, etc. */
   --color-success: #10b981; /* Emerald green */
