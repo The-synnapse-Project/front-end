@@ -1,5 +1,5 @@
 import { Role } from "@/models/Permission";
-import NextAuth, { DefaultSession } from "next-auth";
+import { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
   /**

@@ -3,12 +3,7 @@
 import { useAuth, withRoleAccess } from "@/lib/auth-guard";
 import { Role } from "@/models/Permission";
 import { useState, useEffect } from "react";
-import {
-  getAllPersons,
-  createEntry,
-  getEntriesByDate,
-  getAllEntries,
-} from "@/lib/api-client";
+import { getAllPersons, createEntry, getAllEntries } from "@/lib/api-client";
 import { handleApiRequest } from "@/lib/error-handler";
 import DatePicker from "@/Components/Common/DatePicker";
 import AttendanceTracker from "@/Components/Attendance/AttendanceTracker";
@@ -18,6 +13,7 @@ import StudentAttendanceDetail from "@/Components/Attendance/StudentAttendanceDe
 import { Entry } from "@/models/Entry";
 import { Person } from "@/models/Person";
 import { getTodayString } from "@/lib/date-utils";
+import Image from "next/image";
 
 function TeacherDashboard() {
   const { user } = useAuth();
@@ -248,7 +244,7 @@ function TeacherDashboard() {
                               <div className="flex items-center">
                                 <div className="flex-shrink-0 h-10 w-10">
                                   {person.picture ? (
-                                    <img
+                                    <Image
                                       className="h-10 w-10 rounded-full"
                                       src={person.picture}
                                       alt={person.name}

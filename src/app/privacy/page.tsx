@@ -124,8 +124,8 @@ export default function Privacy() {
             <p className="text-light-txt-secondary dark:text-dark-txt-secondary">
               Podemos actualizar esta política de privacidad de vez en cuando.
               Le notificaremos cualquier cambio publicando la nueva política de
-              privacidad en esta página y actualizando la fecha de "última
-              actualización".
+              privacidad en esta página y actualizando la fecha de &quot;última
+              actualización&quot;.
             </p>
           </section>
 

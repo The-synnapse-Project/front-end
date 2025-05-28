@@ -1,6 +1,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface LoginButtonProps {
   isMobile?: boolean;
@@ -45,7 +46,7 @@ export default function LoginButton({
         <div className="space-y-3 pt-2">
           <div className="flex items-center px-3 pb-2">
             {session.user?.image ? (
-              <img
+              <Image
                 src={session.user.image}
                 alt="Perfil"
                 className="h-8 w-8 rounded-full border-2 border-light-accent/20 dark:border-dark-accent/30 mr-3"
@@ -123,7 +124,7 @@ export default function LoginButton({
         >
           {session.user?.image ? (
             <>
-              <img
+              <Image
                 src={session.user.image}
                 alt="Perfil"
                 className="h-8 w-8 rounded-full border-2 border-light-accent/20 dark:border-dark-accent/30"

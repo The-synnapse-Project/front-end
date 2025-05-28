@@ -21,8 +21,8 @@ export async function fetchWithErrorHandling(
 ): Promise<any> {
   try {
     const uri = new URL(url).pathname;
-    let api_key = await calc_api_key(uri);
-    let new_options = {
+    const api_key = await calc_api_key(uri);
+    const new_options = {
       ...options,
       headers: {
         ...options?.headers,
@@ -134,7 +134,7 @@ export async function updatePerson(
     role?: string;
   },
 ): Promise<PersonResponse> {
-  let real_data = await getPerson(id);
+  const real_data = await getPerson(id);
   if (real_data) {
     data = { ...real_data, ...data };
   }
@@ -184,7 +184,7 @@ export async function updatePermission(
   id: string,
   data: Partial<CreatePermissionRequest>,
 ): Promise<PermissionResponse> {
-  let real_data = await getPermission(id);
+  const real_data = await getPermission(id);
   if (real_data) {
     data = { ...real_data, ...data };
   }
@@ -410,7 +410,7 @@ export async function updateEntry(
   id: string,
   data: { person_id?: string; instant?: string; action?: string },
 ): Promise<EntryResponse> {
-  let real_data = await getEntry(id);
+  const real_data = await getEntry(id);
   if (real_data) {
     data = { ...real_data, ...data };
   }
@@ -565,10 +565,9 @@ export async function calculateAttendanceStats(
 
 async function calc_api_key(uri: string): Promise<string> {
   const api_secret = process.env.SYN_API_SECRET ?? "secret";
-  let hmac = createHmac("sha256", api_secret);
+  const hmac = createHmac("sha256", api_secret);
   hmac.update(uri);
-  let hash = hmac.digest("hex");
-  return hash;
+  return hmac.digest("hex");
 }
 
 /**

@@ -11,6 +11,7 @@ import {
 } from "@/lib/api-client";
 import { Person } from "@/models/Person";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
@@ -231,7 +232,7 @@ export default function ProfilePage() {
             <div className="flex flex-col md:flex-row md:items-center gap-6 mb-6">
               {session?.user?.image ? (
                 <div className="relative">
-                  <img
+                  <Image
                     src={session.user.image}
                     alt="Profile"
                     className="h-24 w-24 rounded-xl object-cover border-2 border-light-accent dark:border-dark-accent shadow-md"

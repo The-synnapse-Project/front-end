@@ -17,6 +17,7 @@ import { Entry } from "@/models/Entry";
 import { Person } from "@/models/Person";
 import { Permission } from "@/models/Permission";
 import { getTodayString } from "@/lib/date-utils";
+import Image from "next/image";
 
 function AdminDashboard() {
   const { user } = useAuth();
@@ -87,7 +88,7 @@ function AdminDashboard() {
     }
 
     loadData();
-  }, []);
+  }, [selectedDate]);
 
   // Load entries when date changes
   useEffect(() => {
@@ -252,7 +253,7 @@ function AdminDashboard() {
                               <div className="flex items-center">
                                 <div className="flex-shrink-0 h-10 w-10">
                                   {person.picture ? (
-                                    <img
+                                    <Image
                                       className="h-10 w-10 rounded-full"
                                       src={person.picture}
                                       alt={person.name}

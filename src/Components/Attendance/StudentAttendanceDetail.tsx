@@ -4,6 +4,7 @@ import { Entry } from "@/models/Entry";
 import { getEntriesByPerson } from "@/lib/api-client";
 import DatePicker from "@/Components/Common/DatePicker";
 import { formatDateDisplay } from "@/lib/date-utils";
+import Image from "next/image";
 
 interface StudentAttendanceDetailProps {
   student: Person;
@@ -171,7 +172,7 @@ export default function StudentAttendanceDetail({
         <div className="flex items-center">
           <div className="flex-shrink-0 h-12 w-12">
             {student.picture ? (
-              <img
+              <Image
                 className="h-12 w-12 rounded-full"
                 src={student.picture}
                 alt={student.name}

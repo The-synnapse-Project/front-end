@@ -3,6 +3,7 @@ import { Person } from "@/models/Person";
 import { Permission, Role } from "@/models/Permission";
 import { updatePermission, updatePerson } from "@/lib/api-client";
 import { getRoleDisplayName } from "@/lib/role-utils";
+import Image from "next/image";
 
 interface PermissionManagementProps {
   persons: Person[];
@@ -267,7 +268,7 @@ export default function PermissionManagement({
                     <div className="flex items-center">
                       {person.picture && (
                         <div className="flex-shrink-0 h-8 w-8 mr-3">
-                          <img
+                          <Image
                             className="h-8 w-8 rounded-full object-cover"
                             src={person.picture}
                             alt={`${person.name}'s profile picture`}

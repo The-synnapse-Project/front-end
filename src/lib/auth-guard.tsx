@@ -27,7 +27,7 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
 
     // If session is loaded and a specific role is required but the user doesn't have it
     if (status === "authenticated" && requiredRole && session?.user?.role) {
-      let hasPermission = checkUserRole(session?.user?.role, requiredRole);
+      const hasPermission = checkUserRole(session?.user?.role, requiredRole);
 
       if (!hasPermission) {
         // Redirect to appropriate dashboard based on actual role

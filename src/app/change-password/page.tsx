@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { changePassword, getPerson } from "@/lib/api-client";
@@ -20,7 +20,7 @@ export default function ChangePasswordPage() {
   useEffect(() => {
     async function fetchPerson() {
       if (!session?.user?.id) return;
-      let person = await getPerson(session?.user?.id);
+      const person = await getPerson(session?.user?.id);
       if (person) {
         setEmail(person.email);
       }

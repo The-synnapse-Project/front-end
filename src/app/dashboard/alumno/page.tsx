@@ -5,18 +5,14 @@ import { Role } from "@/models/Permission";
 import { useState, useEffect } from "react";
 import { getEntriesByPerson } from "@/lib/api-client";
 import DatePicker from "@/Components/Common/DatePicker";
-import AttendanceHistory from "@/Components/Attendance/AttendanceHistory";
 import { Entry } from "@/models/Entry";
-import { Person } from "@/models/Person";
-import { getTodayString, formatDateDisplay } from "@/lib/date-utils";
+import { formatDateDisplay } from "@/lib/date-utils";
 function AlumnoDashboard() {
-  const { user, permissions } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("attendance");
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([]);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [currentUser, setCurrentUser] = useState<Person | null>(null);
   const [dateFilter, setDateFilter] = useState("");
   const [actionFilter, setActionFilter] = useState("");
 
@@ -26,17 +22,6 @@ function AlumnoDashboard() {
 
       setLoading(true);
       try {
-        // Create current user object
-        if (user) {
-          setCurrentUser(
-            new Person(user.name || "User", {
-              id: user.id,
-              email: user.email || undefined,
-              surname: user.surname || undefined,
-            }),
-          );
-        }
-
         // Load entries for the current user
         const entriesData = await getEntriesByPerson(user.id);
         if (!entriesData) return;
@@ -328,8 +313,8 @@ function AlumnoDashboard() {
                           className="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         >
                           <option value="">Todas las acciones</option>
-                            <option value="entrada">Entrada</option>
-                            <option value="salida">Salida</option>
+                          <option value="entrada">Entrada</option>
+                          <option value="salida">Salida</option>
                         </select>
                       </div>
                     </div>

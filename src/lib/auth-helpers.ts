@@ -135,7 +135,7 @@ export const authOptions: NextAuthOptions = {
               // Update the user's Google ID in the database if they don't have one
               if (!existingUser.google_id) {
                 try {
-                  const updateResult = await updateGoogleId(
+                  await updateGoogleId(
                     existingUser.id,
                     account.providerAccountId,
                   );

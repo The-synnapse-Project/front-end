@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Entry } from "@/models/Entry";
 import { Person } from "@/models/Person";
 import { formatDateDisplay } from "@/lib/date-utils";
+import Image from "next/image";
 
 interface AttendanceHistoryProps {
   entries: Entry[];
@@ -186,7 +187,7 @@ export default function AttendanceHistory({
                           <>
                             <div className="flex-shrink-0 h-8 w-8">
                               {person.picture ? (
-                                <img
+                                <Image
                                   className="h-8 w-8 rounded-full"
                                   src={person.picture}
                                   alt={person.name}

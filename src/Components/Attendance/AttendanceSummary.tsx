@@ -2,6 +2,7 @@ import React from "react";
 import { Entry } from "@/models/Entry";
 import { Person } from "@/models/Person";
 import { formatDateDisplay } from "@/lib/date-utils";
+import Image from "next/image";
 
 interface AttendanceSummaryProps {
   entries: Entry[];
@@ -228,7 +229,7 @@ export default function AttendanceSummary({
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
                         {person?.picture ? (
-                          <img
+                          <Image
                             className="h-8 w-8 rounded-full"
                             src={person.picture}
                             alt=""

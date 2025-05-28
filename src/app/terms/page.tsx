@@ -17,10 +17,10 @@ export default function Terms() {
           <section>
             <h2 className="text-xl font-semibold mb-3">1. Introducción</h2>
             <p className="text-light-txt-secondary dark:text-dark-txt-secondary">
-              Bienvenido a Synnapse. Estos Términos de Servicio ("Términos")
-              rigen su acceso y uso de nuestra plataforma de aula inteligente,
-              incluyendo cualquier contenido, funcionalidad y servicios
-              ofrecidos en o a través de nuestro sitio web.
+              Bienvenido a Synnapse. Estos Términos de Servicio
+              (&quot;Términos&quot;) rigen su acceso y uso de nuestra plataforma
+              de aula inteligente, incluyendo cualquier contenido, funcionalidad
+              y servicios ofrecidos en o a través de nuestro sitio web.
             </p>
           </section>
 
