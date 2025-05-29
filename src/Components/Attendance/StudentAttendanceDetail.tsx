@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Person } from "@/models/Person";
-import { Entry } from "@/models/Entry";
+import { Action, Entry } from "@/models/Entry";
 import { getEntriesByPerson } from "@/lib/api-client";
 import DatePicker from "@/Components/Common/DatePicker";
 import { formatDateDisplay } from "@/lib/date-utils";
@@ -240,7 +240,7 @@ export default function StudentAttendanceDetail({
                   {studentStatus.entry && (
                     <span className="ml-2 font-medium">
                       (
-                      {studentStatus.entry.action == "Enter"
+                      {studentStatus.entry.action == Action.Entry
                         ? "Entrada"
                         : "Salida"}
                       )

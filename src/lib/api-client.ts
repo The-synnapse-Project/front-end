@@ -13,6 +13,7 @@ import { processApiError, createApiError } from "./error-handler";
 // Update this with your Rocket API URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 import { createHmac } from "crypto";
+import { Action, Entry } from "@/models/Entry";
 
 // Generic fetch wrapper with improved error handling
 export async function fetchWithErrorHandling(
@@ -440,13 +441,16 @@ export async function exportAttendanceData(
     // Get all entries for each day in the date range
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const allEntries: EntryResponse[] = [];
+    const allEntries: Entry[] = [];
 
     // Loop through each day in the range
     const currentDate = new Date(start);
     while (currentDate <= end) {
       const dateStr = currentDate.toISOString().split("T")[0];
-      const entries = await getEntriesByDate(dateStr);
+      const entryData = await getEntriesByDate(dateStr);
+      const entries: Entry[] = entryData.map((entry) =>
+        Entry.fromApiResponse(entry),
+      );
       allEntries.push(...entries);
 
       // Move to next day
@@ -508,7 +512,7 @@ export async function calculateAttendanceStats(
   try {
     // Get all entries for the date range
     const allEntries = await exportAttendanceData(startDate, endDate, "json");
-    const entries: EntryResponse[] = JSON.parse(allEntries.data);
+    const entries: Entry[] = JSON.parse(allEntries.data);
 
     // Get all persons
     const persons = await getAllPersons();
@@ -518,7 +522,7 @@ export async function calculateAttendanceStats(
       [personId: string]: {
         present: number;
         absent: number;
-        entries: EntryResponse[];
+        entries: Entry[];
       };
     } = {};
     let entriesCount = 0;
@@ -531,10 +535,10 @@ export async function calculateAttendanceStats(
 
     // Process entries
     entries.forEach((entry) => {
-      if (entry.action.toLowerCase() === "entrada") {
+      if (entry.action === Action.Entry) {
         entriesCount++;
         personStats[entry.person_id].present++;
-      } else if (entry.action.toLowerCase() === "salida") {
+      } else if (entry.action === Action.Exit) {
         exitsCount++;
       }
 
@@ -622,6 +626,76 @@ export async function linkGoogleAccount(
     );
   } catch (error) {
     console.error("Link Google account error:", error);
+    return null;
+  }
+}
+
+/**
+ * Link a Google account to an existing user account using OAuth flow
+ */
+export async function linkGoogleAccountOAuth(
+  userId: string,
+  googleId: string,
+  googleEmail: string,
+): Promise<{ status: string; message?: string } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/link-google-oauth`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          google_id: googleId,
+          google_email: googleEmail,
+        }),
+      },
+    );
+  } catch (error) {
+    console.error("Link Google account OAuth error:", error);
+    return null;
+  }
+}
+
+/**
+ * Check if a user has a Google account linked
+ */
+export async function checkGoogleLinked(
+  userId: string,
+): Promise<{ linked: boolean; google_email?: string } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/check-google-linked/${userId}`,
+    );
+  } catch (error) {
+    console.error("Check Google linked error:", error);
+    return null;
+  }
+}
+
+/**
+ * Unlink a Google account from a user
+ */
+export async function unlinkGoogleAccount(
+  userId: string,
+): Promise<{ status: string; message?: string } | null> {
+  try {
+    return await fetchWithErrorHandling(
+      `${API_BASE_URL}/api/auth/unlink-google`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+        }),
+      },
+    );
+  } catch (error) {
+    console.error("Unlink Google account error:", error);
     return null;
   }
 }

@@ -1,10 +1,14 @@
+export enum Action {
+  Entry = "Entrada",
+  Exit = "Salida",
+}
 export class Entry {
   id: string;
   person_id: string;
   instant: string;
-  action: string;
+  action: Action;
 
-  constructor(id: string, person_id: string, instant: string, action: string) {
+  constructor(id: string, person_id: string, instant: string, action: Action) {
     this.id = id;
     this.person_id = person_id;
     this.instant = instant;
@@ -18,7 +22,18 @@ export class Entry {
     instant: string;
     action: string;
   }): Entry {
-    return new Entry(data.id, data.person_id, data.instant, data.action);
+    let action_enum = Action.Entry;
+    switch (data.action.toLowerCase()) {
+      case "entrada":
+      case "enter":
+        action_enum = Action.Entry;
+        break;
+      case "salida":
+      case "exit":
+        action_enum = Action.Exit;
+        break;
+    }
+    return new Entry(data.id, data.person_id, data.instant, action_enum);
   }
 
   // Helper to get a Date object from the instant string
@@ -28,18 +43,12 @@ export class Entry {
 
   // Helper to check if the action is an entry
   get isEntry(): boolean {
-    return (
-      this.action.toLowerCase() === "entrada" ||
-      this.action.toLowerCase() === "enter"
-    );
+    return this.action === Action.Entry;
   }
 
   // Helper to check if the action is an exit
   get isExit(): boolean {
-    return (
-      this.action.toLowerCase() === "salida" ||
-      this.action.toLowerCase() === "exit"
-    );
+    return this.action === Action.Exit;
   }
 
   // Format the date in a readable format

@@ -47,6 +47,8 @@ export default function LoginButton({
           <div className="flex items-center px-3 pb-2">
             {session.user?.image ? (
               <Image
+                width={96}
+                height={96}
                 src={session.user.image}
                 alt="Perfil"
                 className="h-8 w-8 rounded-full border-2 border-light-accent/20 dark:border-dark-accent/30 mr-3"
@@ -125,6 +127,8 @@ export default function LoginButton({
           {session.user?.image ? (
             <>
               <Image
+                width={96}
+                height={96}
                 src={session.user.image}
                 alt="Perfil"
                 className="h-8 w-8 rounded-full border-2 border-light-accent/20 dark:border-dark-accent/30"
@@ -132,8 +136,21 @@ export default function LoginButton({
                   e.currentTarget.onerror = null;
                   e.currentTarget.style.display = "none";
                   setIsDropdownOpen(isDropdownOpen);
+                  const nextElement = e.currentTarget
+                    .nextElementSibling as HTMLElement;
+                  if (nextElement) {
+                    nextElement.style.display = "flex";
+                  }
                 }}
               />
+              <div
+                className="h-24 w-24 rounded-xl bg-blue-500 flex items-center justify-center text-white font-medium text-3xl shadow-md border-2 border-light-accent dark:border-dark-accent"
+                style={{ display: "none" }}
+              >
+                {session?.user?.name?.charAt(0) ||
+                  session?.user?.email?.charAt(0) ||
+                  "U"}
+              </div>
             </>
           ) : (
             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-light-accent to-light-accent-hover dark:from-dark-accent dark:to-dark-accent-hover flex items-center justify-center text-white font-medium shadow-sm">

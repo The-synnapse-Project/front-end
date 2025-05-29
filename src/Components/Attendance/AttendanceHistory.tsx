@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Entry } from "@/models/Entry";
+import { Action, Entry } from "@/models/Entry";
 import { Person } from "@/models/Person";
 import { formatDateDisplay } from "@/lib/date-utils";
 import Image from "next/image";
@@ -10,14 +10,17 @@ interface AttendanceHistoryProps {
   title?: string;
 }
 
+const ENTRIES_PER_PAGE = 20;
+
 export default function AttendanceHistory({
   entries,
   persons,
   title = "Historial de Asistencia",
 }: AttendanceHistoryProps) {
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>(entries);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [dateFilter, setDateFilter] = useState<string>("");
-  const [actionFilter, setActionFilter] = useState<string>("");
+  const [actionFilter, setActionFilter] = useState<Action | "">("");
   const [personFilter, setPersonFilter] = useState<string>("");
 
   // Get a map of person IDs to person objects for easy lookup
@@ -50,7 +53,58 @@ export default function AttendanceHistory({
     }
 
     setFilteredEntries(result);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [entries, dateFilter, actionFilter, personFilter]);
+
+  // Calculate pagination values
+  const totalPages = Math.ceil(filteredEntries.length / ENTRIES_PER_PAGE);
+  const startIndex = (currentPage - 1) * ENTRIES_PER_PAGE;
+  const endIndex = startIndex + ENTRIES_PER_PAGE;
+  const paginatedEntries = filteredEntries.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  const generatePageNumbers = (currentPage: number, totalPages: number) => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (!currentPage || !totalPages || currentPage < 1 || totalPages < 1) {
+      return [1];
+    }
+
+    const safePage = Math.min(currentPage, totalPages);
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (safePage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (safePage >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        for (let i = safePage - 1; i <= safePage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
 
   // Get unique dates for the date filter
   const uniqueDates = Array.from(
@@ -101,7 +155,7 @@ export default function AttendanceHistory({
           <select
             id="action-filter"
             value={actionFilter}
-            onChange={(e) => setActionFilter(e.target.value)}
+            onChange={(e) => setActionFilter(e.target.value as Action | "")}
             className="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             <option value="">Todas las acciones</option>
@@ -165,8 +219,8 @@ export default function AttendanceHistory({
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-            {filteredEntries.length > 0 ? (
-              filteredEntries.map((entry) => {
+            {paginatedEntries.length > 0 ? (
+              paginatedEntries.map((entry) => {
                 const entryDate = new Date(entry.instant);
                 const person = personMap.get(entry.person_id);
 
@@ -246,6 +300,115 @@ export default function AttendanceHistory({
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-4">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              Página {currentPage} de {totalPages}
+            </div>
+
+            <div className="flex">
+              {/* First page button */}
+              <a
+                href="#"
+                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                  currentPage === 1
+                    ? "cursor-not-allowed opacity-50"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage > 1) handlePageChange(1);
+                }}
+              >
+                <span className="sr-only">Primera página</span>
+                &laquo;
+              </a>
+
+              {/* Previous page button */}
+              <a
+                href="#"
+                className={`relative inline-flex items-center px-2 py-2 border-t border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                  currentPage === 1
+                    ? "cursor-not-allowed opacity-50"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage > 1) handlePageChange(currentPage - 1);
+                }}
+              >
+                <span className="sr-only">Página anterior</span>‹
+              </a>
+
+              {/* Page numbers */}
+              {generatePageNumbers(currentPage, totalPages).map(
+                (page, index) =>
+                  typeof page === "number" ? (
+                    <a
+                      key={page}
+                      href="#"
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                        page === currentPage
+                          ? "bg-blue-100 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200"
+                          : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(page);
+                      }}
+                    >
+                      {page}
+                    </a>
+                  ) : (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400"
+                    >
+                      {page}
+                    </span>
+                  ),
+              )}
+
+              {/* Next page button */}
+              <a
+                href="#"
+                className={`relative inline-flex items-center px-2 py-2 border-t border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                  currentPage === totalPages
+                    ? "cursor-not-allowed opacity-50"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage < totalPages)
+                    handlePageChange(currentPage + 1);
+                }}
+              >
+                <span className="sr-only">Página siguiente</span>›
+              </a>
+
+              {/* Last page button */}
+              <a
+                href="#"
+                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                  currentPage === totalPages
+                    ? "cursor-not-allowed opacity-50"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage < totalPages) handlePageChange(totalPages);
+                }}
+              >
+                <span className="sr-only">Última página</span>
+                &raquo;
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
