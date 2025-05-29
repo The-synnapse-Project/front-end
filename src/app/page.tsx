@@ -1,8 +1,10 @@
 "use client";
 import Balatro from "@/Components/Balatro/Balatro";
 import { useTheme } from "@/Components/ThemeContext";
+import { useSession } from "next-auth/react";
 
 export default function Home() {
+  const { data: session } = useSession();
   const { darkMode } = useTheme();
 
   return (
@@ -41,33 +43,59 @@ export default function Home() {
             </p>
 
             <div className="flex gap-6 flex-wrap justify-center mt-12">
-              <a
-                href="/login"
-                className="group px-8 py-4 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold text-lg"
-              >
-                <span className="flex items-center gap-2">
-                  Iniciar Sesión
-                  <svg
-                    className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+              {(session && session.user) || session?.user ? (
+                <a
+                  href="/dashboard"
+                  className="group px-8 py-4 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold text-lg"
+                >
+                  <span className="flex items-center gap-2">
+                    Ir al Panel
+                    <svg
+                      className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </span>
+                </a>
+              ) : (
+                <>
+                  <a
+                    href="/login"
+                    className="group px-8 py-4 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold text-lg"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </span>
-              </a>
-              <a
-                href="/profile"
-                className="group px-8 py-4 bg-transparent border-2 border-light-accent text-light-accent hover:bg-light-accent hover:text-white dark:border-dark-accent dark:text-dark-accent dark:hover:bg-dark-accent dark:hover:text-white rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold text-lg"
-              >
-                Mi Perfil
-              </a>
+                    <span className="flex items-center gap-2">
+                      Iniciar Sesión
+                      <svg
+                        className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        />
+                      </svg>
+                    </span>
+                  </a>
+                  <a
+                    href="/profile"
+                    className="group px-8 py-4 bg-transparent border-2 border-light-accent text-light-accent hover:bg-light-accent hover:text-white dark:border-dark-accent dark:text-dark-accent dark:hover:bg-dark-accent dark:hover:text-white rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold text-lg"
+                  >
+                    Mi Perfil
+                  </a>
+                </>
+              )}
             </div>
           </div>
         </section>
@@ -179,12 +207,22 @@ export default function Home() {
                 revolucionando su forma de aprender y enseñar.
               </p>
               <div className="flex gap-6 flex-wrap justify-center">
-                <a
-                  href="/register"
-                  className="px-8 py-4 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold text-lg"
-                >
-                  Comenzar Ahora
-                </a>
+                {/* Conditional rendering based on session */}
+                {(session && session.user) || session?.user ? (
+                  <a
+                    href="/dashboard"
+                    className="px-8 py-4 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold text-lg"
+                  >
+                    Ir al Panel
+                  </a>
+                ) : (
+                  <a
+                    href="/register"
+                    className="px-8 py-4 bg-light-accent text-white hover:bg-light-accent-hover dark:bg-dark-accent dark:hover:bg-dark-accent-hover rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold text-lg"
+                  >
+                    Comenzar Ahora
+                  </a>
+                )}
                 <a
                   href="/about"
                   className="px-8 py-4 bg-transparent border-2 border-light-accent text-light-accent hover:bg-light-accent hover:text-white dark:border-dark-accent dark:text-dark-accent dark:hover:bg-dark-accent dark:hover:text-white rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold text-lg"
